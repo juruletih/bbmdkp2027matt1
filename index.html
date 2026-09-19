@@ -391,12 +391,12 @@ async function renderKbList(){
   const listEl = document.getElementById("kb-list");
   listEl.innerHTML = `<li class="skeleton">Memuatkan senarai fail…</li>`;
   try{
-    const items = await listDir("kb");
+    const items = await listDir("iqra");
     const files = items.filter(it => it.type === "file" && it.name.endsWith(".md"))
                         .sort((a,b) => a.name.localeCompare(b.name));
     listEl.innerHTML = "";
     files.forEach(f => {
-      const relPath = "kb/" + f.name;
+      const relPath = "iqra/" + f.name;
       const desc = KB_DESCRIPTIONS[f.name] || titleFromFilename(f.name);
       const li = document.createElement("li");
       li.innerHTML = `
