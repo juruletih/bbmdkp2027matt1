@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Model Bar Interaktif</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --border:#e5e7eb; --danger:#dc2626;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:560px; width:100%;}
+  h1{font-size:1.1rem; margin:0 0 8px; text-align:center;}
+  .tabs{display:flex; gap:6px; margin-bottom:10px;}
+  .tab{flex:1; padding:9px 4px; text-align:center; border-radius:10px; border:1px solid var(--border); background:var(--card); font-weight:700; font-size:0.75rem; cursor:pointer;}
+  .tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;}
+  .qlist{display:flex; flex-direction:column; gap:6px;}
+  .qbtn{padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); text-align:left; font-size:0.83rem; cursor:pointer;}
+  .qbtn.active{border-color:var(--accent); background:rgba(37,99,235,0.08);}
+  .qtext{font-size:0.92rem; font-weight:600; margin-bottom:10px; line-height:1.4;}
+  .row{margin-bottom:8px;}
+  .rowlabel{width:100%; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.78rem; margin-bottom:4px;}
+  .segs{display:flex; flex-wrap:wrap; gap:3px; align-items:center;}
+  .seg{width:44px; height:38px; border-radius:6px; border:none; text-align:center; font-weight:700; font-size:0.78rem; color:#fff;}
+  .seg.static{display:flex; align-items:center; justify-content:center;}
+  .segbtn{width:30px; height:38px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--text); font-weight:700; cursor:pointer;}
+  .rowctrl{display:flex; gap:4px; margin-top:3px;}
+  .rowctrl button{padding:3px 8px; font-size:0.7rem; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--sub); cursor:pointer;}
+  button.primary{padding:10px 14px; border-radius:10px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:0.85rem; cursor:pointer;}
+  button.secondary{padding:9px 12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; font-size:0.8rem; cursor:pointer;}
+  .btnrow{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .reveal{margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);}
+  .steps{font-size:0.85rem; line-height:1.6; background:var(--bg); padding:10px; border-radius:10px; margin-top:8px;}
+  .answer{font-weight:800; color:var(--accent2); text-align:center; padding:8px; margin-top:6px;}
+  textarea, input.form{width:100%; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem; margin-bottom:6px;}
+  .toolbar{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+  .toolbar button{flex:1; min-width:100px;}
+  .note{font-size:0.75rem; color:var(--sub); text-align:center; margin-top:4px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Model Bar Interaktif</h1>
+
+  <div class="tabs" id="tabsBar"></div>
+
+  <div class="card">
+    <div class="btnrow" id="levelFilterBar" style="margin-top:0;margin-bottom:10px;"></div>
+    <div class="qlist" id="qList"></div>
+    <div class="btnrow">
+      <button class="secondary" id="addQBtn">➕ Tambah Soalan (Guru)</button>
+    </div>
+  </div>
+
+  <div class="card" id="questionCard" style="display:none;">
+    <div class="qtext" id="qText"></div>
+
+    <b style="font-size:0.8rem;">Ruang Kerja Murid</b>
+    <div id="workArea"></div>
+    <div class="btnrow">
+      <button class="secondary" id="addRowBtn">+ Baris Baharu</button>
+      <button class="secondary" id="clearWorkBtn">🗑 Kosongkan</button>
+    </div>
+
+    <div class="btnrow">
+      <button class="primary" id="revealBtn">👁 Lihat Cadangan Penyelesaian</button>
+    </div>
+
+    <div class="reveal hidden" id="revealBox">
+      <b style="font-size:0.8rem;">Cadangan Model Bar</b>
+      <div id="modelArea"></div>
+      <div class="steps" id="stepsBox"></div>
+      <div class="answer" id="answerBox"></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="addQCard">
+    <b style="font-size:0.9rem;">➕ Tambah Soalan Baharu</b>
+    <p style="font-size:0.78rem;color:var(--sub);">Soalan akan ditambah ke tajuk semasa: <span id="addQTarget"></span></p>
+    <textarea id="newQText" rows="3" class="form" placeholder="Tulis soalan berayat di sini..."></textarea>
+    <textarea id="newQSteps" rows="4" class="form" placeholder="Langkah penyelesaian (satu langkah setiap baris)"></textarea>
+    <input type="text" id="newQAnswer" class="form" placeholder="Jawapan akhir (cth: RM120 atau x = 9)">
+    <div class="btnrow">
+      <button class="primary" id="saveQBtn">Simpan Soalan</button>
+      <button class="secondary" id="cancelQBtn">Batal</button>
+    </div>
+    <p class="note">Soalan guru tidak mempunyai rajah bar automatik — hanya langkah teks.</p>
+  </div>
+
+  <div class="card">
+    <div class="btnrow">
+      <button class="secondary" id="exportBtn">⬇️ Muat Turun Soalan Guru (JSON)</button>
+      <button class="secondary" id="importBtnLabel">⬆️ Muat Naik Soalan (JSON)</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;">
+    </div>
+    <p class="note">Soalan guru disimpan pada peranti ini. Muat turun untuk kongsi dengan rakan guru atau peranti lain.</p>
+  </div>
+</div>
+
+<script>
+const COLORS=['#2563eb','#dc2626','#059669','#7c3aed','#d97706','#0891b2'];
+
+const BUILTIN = {
+  '1.2.2': [
+    {lvl:'R', text:'Sebuah bakul mengandungi buah-buahan. 3/8 daripadanya ialah epal dan selebihnya limau. Jika terdapat 15 biji epal, berapakah jumlah buah dalam bakul itu?',
+      model:{rows:[{label:'Jumlah (8 unit)', segments:[{v:'Epal',c:0},{v:'Epal',c:0},{v:'Epal',c:0},{v:'Limau',c:1},{v:'Limau',c:1},{v:'Limau',c:1},{v:'Limau',c:1},{v:'Limau',c:1}]}]},
+      steps:['Epal = 3 unit = 15','1 unit = 15 ÷ 3 = 5','Jumlah = 8 unit = 8 × 5 = 40'], answer:'Jumlah buah ialah 40 biji.'},
+    {lvl:'R', text:'Ali mempunyai RM60. Dia membelanjakan 1/4 daripada wangnya untuk membeli buku. Berapakah baki wang Ali?',
+      model:{rows:[{label:'RM60 (4 unit)', segments:[{v:'Buku',c:0},{v:'Baki',c:1},{v:'Baki',c:1},{v:'Baki',c:1}]}]},
+      steps:['4 unit = RM60','1 unit = 60 ÷ 4 = RM15','Baki = 3 unit = 3 × 15 = RM45'], answer:'Baki wang Ali ialah RM45.'},
+    {lvl:'R', text:'Sebuah kelas mempunyai 40 orang murid. 2/5 daripada mereka ialah murid perempuan. Berapakah bilangan murid lelaki?',
+      model:{rows:[{label:'40 murid (5 unit)', segments:[{v:'P',c:0},{v:'P',c:0},{v:'L',c:1},{v:'L',c:1},{v:'L',c:1}]}]},
+      steps:['5 unit = 40','1 unit = 40 ÷ 5 = 8','Lelaki = 3 unit = 3 × 8 = 24'], answer:'Bilangan murid lelaki ialah 24 orang.'},
+    {lvl:'S', text:'Seorang peniaga menjual 2/3 daripada stok kasutnya pada hari pertama. Pada hari kedua, dia menjual 1/4 daripada baki stok. Jika 30 pasang kasut masih tinggal, berapakah jumlah stok asal?',
+      model:{rows:[
+        {label:'Stok Asal (3 unit besar)', segments:[{v:'Hari 1',c:0},{v:'Hari 1',c:0},{v:'Baki(1u)',c:1}]},
+        {label:'Baki dibahagi 4', segments:[{v:'Hari 2',c:2},{v:'30',c:3},{v:'30',c:3},{v:'30',c:3}]}
+      ]},
+      steps:['Baki (1 unit besar) = 4 unit kecil','Baki akhir = 3 unit kecil = 30','1 unit kecil = 10','Baki (1 unit besar) = 4 × 10 = 40','Stok asal (setara 12 unit kecil) = 12 × 10 = 120'], answer:'Jumlah stok asal ialah 120 pasang kasut.'},
+    {lvl:'S', text:'Amir mempunyai wang RM35 lebih banyak daripada Faris. Jika Faris mempunyai RM85, berapakah jumlah wang mereka berdua?',
+      model:{rows:[
+        {label:'Faris', segments:[{v:'RM85',c:0}]},
+        {label:'Amir', segments:[{v:'RM85',c:0},{v:'RM35',c:1}]}
+      ]},
+      steps:['Amir = 85 + 35 = RM120','Jumlah = 85 + 120 = RM205'], answer:'Jumlah wang mereka berdua ialah RM205.'},
+    {lvl:'S', text:'Harga sehelai baju ialah RM45. Selepas diskaun 20%, berapakah harga baju itu?',
+      model:{rows:[{label:'RM45 (5 unit = 20% setiap unit)', segments:[{v:'Diskaun',c:0},{v:'9',c:1},{v:'9',c:1},{v:'9',c:1},{v:'9',c:1}]}]},
+      steps:['100% = RM45, dibahagi 5 unit (20% setiap unit)','1 unit = 45 ÷ 5 = RM9','Harga selepas diskaun = 4 unit = 4 × 9 = RM36'], answer:'Harga selepas diskaun ialah RM36.'},
+    {lvl:'T', text:'Mahmud memberikan 1/5 daripada gaji bulanannya kepada ibunya. Mahmud memberikan 3/4 daripada baki gajinya kepada isterinya dan menyimpan selebihnya. Mahmud berjaya menyimpan RM750 setiap bulan. Berapakah gaji Mahmud sebulan?',
+      model:{rows:[
+        {label:'Gaji (5 unit)', segments:[{v:'Ibu (1u)',c:0},{v:'Baki (4u)',c:1}]},
+        {label:'Baki dibahagi 4', segments:[{v:'Isteri',c:2},{v:'Isteri',c:2},{v:'Isteri',c:2},{v:'RM750',c:3}]}
+      ]},
+      steps:['Baki (4 unit) = Isteri (3 unit) + Simpan (1 unit)','1 unit (baki) = RM750','Baki penuh = 4 × 750 = RM3000 (= 4/5 gaji)','1 unit (gaji) = 3000 ÷ 4 = RM750','Gaji penuh (5 unit) = 5 × 750 = RM3750'], answer:'Gaji Mahmud ialah RM3750 sebulan.'},
+    {lvl:'T', text:'Peserta A mendapat 3 kali ganda markah peserta B. Peserta C mendapat 10 markah kurang daripada peserta A. Jumlah markah ketiga-tiga peserta ialah 130. Cari markah setiap peserta.',
+      model:{rows:[
+        {label:'B (1 unit)', segments:[{v:'x',c:0}]},
+        {label:'A (3 unit)', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0}]},
+        {label:'C (3 unit − 10)', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'-10',c:1}]}
+      ]},
+      steps:['Jumlah unit = 1+3+3 = 7 unit, tolak 10 = 130','7 unit = 140','1 unit = 20','B=20, A=3×20=60, C=60−10=50'], answer:'B=20, A=60, C=50.'},
+    {lvl:'T', text:'Bilangan peserta lelaki ialah 2 kali bilangan peserta perempuan dalam suatu acara sukan. Selepas 15 peserta perempuan tambahan menyertai, bilangan peserta perempuan menjadi SAMA dengan bilangan peserta lelaki. Berapakah jumlah peserta pada mulanya?',
+      model:{rows:[
+        {label:'Perempuan (mula)', segments:[{v:'1u',c:0}]},
+        {label:'Lelaki', segments:[{v:'1u',c:0},{v:'1u',c:0}]},
+        {label:'Perempuan (selepas +15)', segments:[{v:'1u',c:0},{v:'+15',c:1}]}
+      ]},
+      steps:['Perempuan+15 = Lelaki (2 unit)','1 unit + 15 = 2 unit → 15 = 1 unit','Perempuan mula = 15, Lelaki = 30','Jumlah mula = 15+30 = 45'], answer:'Jumlah peserta pada mulanya ialah 45 orang.'}
+  ],
+  '3.2.3': [
+    {lvl:'R', text:'Nisbah bilangan kucing kepada anjing di sebuah kedai haiwan ialah 2:3. Jika terdapat 6 ekor kucing, berapakah bilangan anjing?',
+      model:{rows:[{label:'Kucing (2u=6)', segments:[{v:'3',c:0},{v:'3',c:0}]},{label:'Anjing (3u)', segments:[{v:'3',c:1},{v:'3',c:1},{v:'3',c:1}]}]},
+      steps:['2 unit = 6','1 unit = 3','Anjing = 3 unit = 9'], answer:'Bilangan anjing ialah 9 ekor.'},
+    {lvl:'R', text:'Harga 3 biji mangga ialah RM12. Berapakah harga 5 biji mangga?',
+      model:{rows:[{label:'3 biji = RM12', segments:[{v:'4',c:0},{v:'4',c:0},{v:'4',c:0}]},{label:'5 biji = ?', segments:[{v:'4',c:1},{v:'4',c:1},{v:'4',c:1},{v:'4',c:1},{v:'4',c:1}]}]},
+      steps:['3 unit = RM12','1 unit = RM4','5 unit = 5×4 = RM20'], answer:'Harga 5 biji mangga ialah RM20.'},
+    {lvl:'R', text:'Nisbah murid lelaki kepada perempuan dalam sebuah kelas ialah 4:5. Jika terdapat 20 murid lelaki, berapakah jumlah murid dalam kelas?',
+      model:{rows:[{label:'Lelaki (4u=20)', segments:[{v:'5',c:0},{v:'5',c:0},{v:'5',c:0},{v:'5',c:0}]},{label:'Perempuan (5u)', segments:[{v:'5',c:1},{v:'5',c:1},{v:'5',c:1},{v:'5',c:1},{v:'5',c:1}]}]},
+      steps:['4 unit = 20','1 unit = 5','Perempuan = 5 unit = 25','Jumlah = 20+25 = 45'], answer:'Jumlah murid ialah 45 orang.'},
+    {lvl:'S', text:'Nisbah bilangan buku kepada fail dalam sebuah almari ialah 5:3. Jika terdapat 15 helai fail, berapakah jumlah buku dan fail?',
+      model:{rows:[{label:'Buku (5 unit)', segments:[{v:'5',c:0},{v:'5',c:0},{v:'5',c:0},{v:'5',c:0},{v:'5',c:0}]},{label:'Fail (3 unit = 15)', segments:[{v:'5',c:1},{v:'5',c:1},{v:'5',c:1}]}]},
+      steps:['Fail = 3 unit = 15','1 unit = 5','Buku = 5 unit = 25','Jumlah = 25+15 = 40'], answer:'Jumlah buku dan fail ialah 40.'},
+    {lvl:'S', text:'Harga bagi 4 kg gula-gula ialah RM18. Menggunakan kaedah unitari, cari harga bagi 7 kg gula-gula.',
+      model:{rows:[{label:'4 kg = RM18', segments:[{v:'4.50',c:0},{v:'4.50',c:0},{v:'4.50',c:0},{v:'4.50',c:0}]},{label:'7 kg = ?', segments:[{v:'4.50',c:2},{v:'4.50',c:2},{v:'4.50',c:2},{v:'4.50',c:2},{v:'4.50',c:2},{v:'4.50',c:2},{v:'4.50',c:2}]}]},
+      steps:['4 kg = RM18','1 kg = RM4.50','7 kg = 7×4.50 = RM31.50'], answer:'Harga 7 kg gula-gula ialah RM31.50.'},
+    {lvl:'S', text:'3 buah mesin dapat menghasilkan 240 unit produk sehari. Berapakah unit produk yang dapat dihasilkan oleh 7 buah mesin dalam tempoh yang sama?',
+      model:{rows:[{label:'3 mesin = 240 unit', segments:[{v:'80',c:0},{v:'80',c:0},{v:'80',c:0}]},{label:'7 mesin = ?', segments:[{v:'80',c:1},{v:'80',c:1},{v:'80',c:1},{v:'80',c:1},{v:'80',c:1},{v:'80',c:1},{v:'80',c:1}]}]},
+      steps:['3 unit = 240','1 unit = 80','7 unit = 7×80 = 560'], answer:'7 buah mesin menghasilkan 560 unit produk.'},
+    {lvl:'T', text:'Nisbah wang Ali, Bakar dan Chong ialah 2:3:5. Jika jumlah wang mereka ialah RM300, berapakah wang Bakar?',
+      model:{rows:[{label:'Ali (2u)', segments:[{v:'30',c:0},{v:'30',c:0}]},{label:'Bakar (3u)', segments:[{v:'30',c:1},{v:'30',c:1},{v:'30',c:1}]},{label:'Chong (5u)', segments:[{v:'30',c:2},{v:'30',c:2},{v:'30',c:2},{v:'30',c:2},{v:'30',c:2}]}]},
+      steps:['Jumlah unit = 2+3+5 = 10','10 unit = RM300','1 unit = RM30','Bakar = 3 unit = RM90'], answer:'Wang Bakar ialah RM90.'},
+    {lvl:'T', text:'Sebuah kereta bergerak dengan kadar tetap. Dalam masa 2 jam, ia menempuh 140 km. Dengan kadar yang sama, berapa lamakah masa diperlukan untuk menempuh 350 km?',
+      model:{rows:[{label:'2 jam = 140 km', segments:[{v:'70',c:0},{v:'70',c:0}]},{label:'350 km = ? jam', segments:[{v:'70',c:1},{v:'70',c:1},{v:'70',c:1},{v:'70',c:1},{v:'70',c:1}]}]},
+      steps:['2 unit(jam) = 140 km','1 unit = 70 km sejam','350 ÷ 70 = 5 unit(jam)'], answer:'Masa diperlukan ialah 5 jam.'},
+    {lvl:'T', text:'Modal yang dilaburkan oleh Amin, Faisal dan Karim adalah dalam nisbah 3:4:5. Jumlah keuntungan RM4800 diagihkan mengikut nisbah modal. Berapakah bahagian keuntungan Faisal?',
+      model:{rows:[{label:'Amin (3u)', segments:[{v:'400',c:0},{v:'400',c:0},{v:'400',c:0}]},{label:'Faisal (4u)', segments:[{v:'400',c:1},{v:'400',c:1},{v:'400',c:1},{v:'400',c:1}]},{label:'Karim (5u)', segments:[{v:'400',c:2},{v:'400',c:2},{v:'400',c:2},{v:'400',c:2},{v:'400',c:2}]}]},
+      steps:['Jumlah unit = 3+4+5 = 12','12 unit = RM4800','1 unit = RM400','Faisal = 4 unit = RM1600'], answer:'Bahagian keuntungan Faisal ialah RM1600.'}
+  ],
+  '4.1.3': [
+    {lvl:'R', text:'Permudahkan ungkapan 3(2x + 4) menggunakan model bar.',
+      model:{rows:[{label:'2x+4 (×3)', segments:[{v:'x',c:0},{v:'x',c:0},{v:'4',c:1}]},{label:'', segments:[{v:'x',c:0},{v:'x',c:0},{v:'4',c:1}]},{label:'', segments:[{v:'x',c:0},{v:'x',c:0},{v:'4',c:1}]}]},
+      steps:['3 baris "2x+4" digabungkan','Jumlah bar x = 2x×3 = 6x','Jumlah bar nombor = 4×3 = 12'], answer:'3(2x+4) = 6x + 12'},
+    {lvl:'R', text:'Suatu nombor ditambah 5, kemudian didarab 2, menghasilkan 24. Bentuk: 2(x+5)=24. Cari nombor itu.',
+      model:{rows:[{label:'(x+5) ×2 = 24', segments:[{v:'x',c:0},{v:'5',c:1}]},{label:'', segments:[{v:'x',c:0},{v:'5',c:1}]}]},
+      steps:['2(x+5) = 24','x+5 = 12','x = 7'], answer:'Nombor itu ialah 7.'},
+    {lvl:'R', text:'Permudahkan (6x + 9) ÷ 3 menggunakan model bar.',
+      model:{rows:[{label:'6x+9 dibahagi 3 bahagian sama', segments:[{v:'2x',c:0},{v:'3',c:1},{v:'2x',c:0},{v:'3',c:1},{v:'2x',c:0},{v:'3',c:1}]}]},
+      steps:['Bahagikan 6x kepada 3 bahagian sama = 2x setiap bahagian','Bahagikan 9 kepada 3 bahagian sama = 3 setiap bahagian','1 bahagian = 2x + 3'], answer:'(6x+9) ÷ 3 = 2x + 3'},
+    {lvl:'S', text:'Permudahkan ungkapan 2(4x + 5) menggunakan model bar.',
+      model:{rows:[{label:'4x+5', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'5',c:1}]},{label:'4x+5', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'5',c:1}]}]},
+      steps:['2 baris "4x+5" digabungkan','Jumlah bar x = 4x+4x = 8x','Jumlah bar nombor = 5+5 = 10'], answer:'2(4x+5) = 8x + 10'},
+    {lvl:'S', text:'Suatu nombor didarab 4, kemudian ditolak 6, hasilnya 30. Bentuk: 4x − 6 = 30. Cari nilai x.',
+      model:{rows:[{label:'4 unit x, tolak 6, = 30', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'x',c:0}]},{label:'4 unit x = 36', segments:[{v:'9',c:2},{v:'9',c:2},{v:'9',c:2},{v:'9',c:2}]}]},
+      steps:['4x − 6 = 30','4x = 36','x = 9'], answer:'x = 9'},
+    {lvl:'S', text:'Permudahkan ungkapan 3(5x − 2) menggunakan model bar.',
+      model:{rows:[{label:'5x−2 (×3)', segments:[{v:'5x',c:0},{v:'-2',c:1}]},{label:'', segments:[{v:'5x',c:0},{v:'-2',c:1}]},{label:'', segments:[{v:'5x',c:0},{v:'-2',c:1}]}]},
+      steps:['3 baris "5x−2" digabungkan','Jumlah bar x = 5x×3 = 15x','Jumlah bahagian tolak = 2×3 = 6'], answer:'3(5x−2) = 15x − 6'},
+    {lvl:'T', text:'Suatu nombor didarab 3, ditambah 7, kemudian jumlah itu didarab 2, menghasilkan 50. Bentuk: 2(3x+7)=50. Cari nombor itu.',
+      model:{rows:[{label:'(3x+7) ×2 = 50', segments:[{v:'3x',c:0},{v:'7',c:1}]},{label:'', segments:[{v:'3x',c:0},{v:'7',c:1}]}]},
+      steps:['2(3x+7) = 50','3x+7 = 25','3x = 18','x = 6'], answer:'Nombor itu ialah 6.'},
+    {lvl:'T', text:'Panjang sebuah segi empat tepat ialah (2x+3) cm dan lebarnya x cm. Jika perimeternya 36 cm, cari nilai x.',
+      model:{rows:[{label:'Panjang+Lebar (×2 = perimeter)', segments:[{v:'2x',c:0},{v:'3',c:1},{v:'x',c:2}]},{label:'', segments:[{v:'2x',c:0},{v:'3',c:1},{v:'x',c:2}]}]},
+      steps:['Perimeter = 2(panjang+lebar) = 2(3x+3) = 6x+6','6x+6 = 36','6x = 30','x = 5'], answer:'x = 5'},
+    {lvl:'T', text:'Umur Ali ialah 3 kali umur adiknya sekarang. 5 tahun lagi, umur Ali akan menjadi 2 kali umur adiknya pada masa itu. Cari umur Ali sekarang.',
+      model:{rows:[{label:'Adik (sekarang)', segments:[{v:'x',c:0}]},{label:'Ali (sekarang, 3 unit)', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0}]},{label:'5 tahun lagi: Ali = 2×Adik', segments:[{v:'x',c:0},{v:'+5',c:1}]},{label:'', segments:[{v:'x',c:0},{v:'x',c:0},{v:'x',c:0},{v:'+5',c:1}]}]},
+      steps:['3x+5 = 2(x+5)','3x+5 = 2x+10','x = 5','Umur Ali sekarang = 3×5 = 15'], answer:'Umur Ali sekarang ialah 15 tahun.'}
+  ]
+};
+const LEVEL_NAMES = {R:'🟢 Rendah', S:'🟡 Sederhana', T:'🔴 Tinggi'};
+let currentLevelFilter = 'ALL';
+
+const SP_NAMES = {'1.2.2':'SP 1.2.2 Nombor Nisbah','3.2.3':'SP 3.2.3 Kadar & Perkadaran','4.1.3':'SP 4.1.3 Ungkapan Algebra'};
+let currentSP = '1.2.2';
+let currentQIndex = 0;
+let workRows = [];
+
+function loadCustom(sp){
+  try{
+    const raw = localStorage.getItem('modelbar_custom_'+sp);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveCustom(sp, arr){
+  try{ localStorage.setItem('modelbar_custom_'+sp, JSON.stringify(arr)); }catch(e){}
+}
+function allQuestions(sp){ return [...BUILTIN[sp], ...loadCustom(sp)]; }
+
+function renderTabs(){
+  const bar = document.getElementById('tabsBar');
+  bar.innerHTML='';
+  Object.keys(SP_NAMES).forEach(sp=>{
+    const d=document.createElement('div');
+    d.className='tab'+(sp===currentSP?' active':'');
+    d.textContent=sp;
+    d.onclick=()=>{ currentSP=sp; currentQIndex=-1; currentLevelFilter='ALL'; renderTabs(); renderLevelFilter(); renderQList(); hideQuestion(); };
+    bar.appendChild(d);
+  });
+}
+
+function renderLevelFilter(){
+  const bar = document.getElementById('levelFilterBar');
+  bar.innerHTML='';
+  const opts = [['ALL','Semua'],['R','🟢 Rendah'],['S','🟡 Sederhana'],['T','🔴 Tinggi']];
+  opts.forEach(([key,label])=>{
+    const b=document.createElement('button');
+    b.className='secondary';
+    b.style.fontWeight = (currentLevelFilter===key) ? '800' : '600';
+    b.style.borderColor = (currentLevelFilter===key) ? 'var(--accent)' : 'var(--border)';
+    b.textContent = label;
+    b.onclick = ()=>{ currentLevelFilter=key; renderLevelFilter(); renderQList(); };
+    bar.appendChild(b);
+  });
+}
+
+function renderQList(){
+  document.getElementById('addQTarget').textContent = SP_NAMES[currentSP];
+  const list = document.getElementById('qList');
+  list.innerHTML='';
+  const qs = allQuestions(currentSP);
+  qs.forEach((q,i)=>{
+    if(currentLevelFilter!=='ALL' && q.lvl && q.lvl!==currentLevelFilter) return;
+    const b=document.createElement('button');
+    b.className='qbtn'+(i===currentQIndex?' active':'');
+    const badge = q.lvl ? (LEVEL_NAMES[q.lvl]+' — ') : '';
+    b.textContent = badge+(i+1)+'. '+q.text.slice(0,55)+(q.text.length>55?'...':'');
+    b.onclick=()=> openQuestion(i);
+    list.appendChild(b);
+  });
+}
+
+function hideQuestion(){
+  document.getElementById('questionCard').style.display='none';
+}
+
+function openQuestion(i){
+  currentQIndex=i;
+  renderQList();
+  const q = allQuestions(currentSP)[i];
+  document.getElementById('questionCard').style.display='block';
+  document.getElementById('qText').textContent=q.text;
+  document.getElementById('revealBox').classList.add('hidden');
+  workRows = [{label:'', segments:[{v:'',c:0}]}];
+  renderWork();
+}
+
+function renderSegBox(seg, editable, onchange){
+  if(editable){
+    const inp=document.createElement('input');
+    inp.className='seg';
+    inp.style.background=COLORS[seg.c%COLORS.length];
+    inp.value=seg.v||'';
+    inp.oninput=(e)=>{ seg.v=e.target.value; };
+    return inp;
+  } else {
+    const d=document.createElement('div');
+    d.className='seg static';
+    d.style.background=COLORS[seg.c%COLORS.length];
+    d.textContent=seg.v;
+    return d;
+  }
+}
+
+function renderRows(container, rows, editable){
+  container.innerHTML='';
+  rows.forEach((row,ri)=>{
+    const rd=document.createElement('div');
+    rd.className='row';
+    if(editable){
+      const li=document.createElement('input');
+      li.className='rowlabel';
+      li.placeholder='Label baris (cth: Ibu, Isteri...)';
+      li.value=row.label||'';
+      li.oninput=(e)=>{ row.label=e.target.value; };
+      rd.appendChild(li);
+    } else {
+      const ld=document.createElement('div');
+      ld.className='rowlabel';
+      ld.style.background='var(--card)';
+      ld.style.fontWeight='700';
+      ld.textContent=row.label;
+      rd.appendChild(ld);
+    }
+    const segsDiv=document.createElement('div');
+    segsDiv.className='segs';
+    row.segments.forEach(seg=> segsDiv.appendChild(renderSegBox(seg, editable)));
+    if(editable){
+      const plus=document.createElement('button');
+      plus.className='segbtn'; plus.textContent='+';
+      plus.onclick=()=>{ row.segments.push({v:'',c:ri%COLORS.length}); renderRows(container,rows,true); };
+      segsDiv.appendChild(plus);
+      const minus=document.createElement('button');
+      minus.className='segbtn'; minus.textContent='−';
+      minus.onclick=()=>{ if(row.segments.length>1) row.segments.pop(); renderRows(container,rows,true); };
+      segsDiv.appendChild(minus);
+    }
+    rd.appendChild(segsDiv);
+    if(editable){
+      const ctrl=document.createElement('div');
+      ctrl.className='rowctrl';
+      const del=document.createElement('button');
+      del.textContent='Padam Baris';
+      del.onclick=()=>{ rows.splice(ri,1); renderRows(container,rows,true); };
+      ctrl.appendChild(del);
+      rd.appendChild(ctrl);
+    }
+    container.appendChild(rd);
+  });
+}
+
+function renderWork(){ renderRows(document.getElementById('workArea'), workRows, true); }
+
+document.getElementById('addRowBtn').onclick=()=>{
+  workRows.push({label:'', segments:[{v:'',c:workRows.length%COLORS.length}]});
+  renderWork();
+};
+document.getElementById('clearWorkBtn').onclick=()=>{
+  workRows=[{label:'', segments:[{v:'',c:0}]}];
+  renderWork();
+};
+
+document.getElementById('revealBtn').onclick=()=>{
+  const q = allQuestions(currentSP)[currentQIndex];
+  document.getElementById('revealBox').classList.remove('hidden');
+  const modelArea = document.getElementById('modelArea');
+  if(q.model){
+    const rows = q.model.rows.map(r=>({label:r.label, segments:r.segments.map(s=>({v:s.v,c:s.c}))}));
+    renderRows(modelArea, rows, false);
+  } else {
+    modelArea.innerHTML = '<p style="font-size:0.8rem;color:var(--sub);">(Soalan guru — tiada rajah automatik)</p>';
+  }
+  document.getElementById('stepsBox').innerHTML = '<ol>'+q.steps.map(s=>`<li>${s}</li>`).join('')+'</ol>';
+  document.getElementById('answerBox').textContent = q.answer;
+};
+
+document.getElementById('addQBtn').onclick=()=>{
+  document.getElementById('addQCard').classList.remove('hidden');
+  document.getElementById('addQTarget').textContent = SP_NAMES[currentSP];
+};
+document.getElementById('cancelQBtn').onclick=()=>{
+  document.getElementById('addQCard').classList.add('hidden');
+};
+document.getElementById('saveQBtn').onclick=()=>{
+  const text = document.getElementById('newQText').value.trim();
+  const stepsRaw = document.getElementById('newQSteps').value.trim();
+  const answer = document.getElementById('newQAnswer').value.trim();
+  if(!text || !answer){ alert('Sila isi sekurang-kurangnya soalan dan jawapan.'); return; }
+  const steps = stepsRaw ? stepsRaw.split('\n').filter(s=>s.trim()) : ['(Tiada langkah dicatat)'];
+  const arr = loadCustom(currentSP);
+  arr.push({text, steps, answer, model:null});
+  saveCustom(currentSP, arr);
+  document.getElementById('newQText').value='';
+  document.getElementById('newQSteps').value='';
+  document.getElementById('newQAnswer').value='';
+  document.getElementById('addQCard').classList.add('hidden');
+  renderQList();
+};
+
+document.getElementById('exportBtn').onclick= async ()=>{
+  const data = {};
+  Object.keys(SP_NAMES).forEach(sp=> data[sp]=loadCustom(sp));
+  const json = JSON.stringify(data, null, 2);
+  try{
+    const downloads = await claude.use('downloads');
+    if(downloads){
+      await downloads.save({filename:'soalan-model-bar.json', data: json});
+      return;
+    }
+  }catch(e){}
+  // fallback: show in a prompt-like box if downloads capability unavailable
+  alert('Fungsi muat turun tidak tersedia pada paparan ini. Salin teks berikut secara manual:\n\n'+json.slice(0,500)+'...');
+};
+
+document.getElementById('importBtnLabel').onclick=()=> document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=(e)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      Object.keys(SP_NAMES).forEach(sp=>{
+        if(data[sp]){
+          const existing = loadCustom(sp);
+          saveCustom(sp, existing.concat(data[sp]));
+        }
+      });
+      renderQList();
+      alert('Soalan berjaya dimuat naik!');
+    }catch(err){
+      alert('Fail JSON tidak sah.');
+    }
+  };
+  reader.readAsText(file);
+};
+
+renderTabs();
+renderLevelFilter();
+renderQList();
+</script>
+</body>
+</html>

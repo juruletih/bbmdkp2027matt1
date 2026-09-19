@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Geometri Dinamik: Garis Selari & Rentas Lintang</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --border:#e5e7eb; --neutral:#9ca3af;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040;
+    }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:540px; width:100%;}
+  h1{font-size:1.15rem; margin:0 0 2px;}
+  p.sub{color:var(--sub); margin:0 0 12px; font-size:0.85rem;}
+  .modes{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+  .mode{flex:1; min-width:70px; padding:9px 4px; text-align:center; border-radius:10px; border:1px solid var(--border); background:var(--card); font-weight:600; font-size:0.78rem; cursor:pointer;}
+  .mode.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;}
+  svg{width:100%; height:auto; display:block; touch-action:none; background:var(--bg); border-radius:10px;}
+  .control label{display:flex; justify-content:space-between; font-size:0.85rem; font-weight:600; margin-bottom:6px;}
+  .control label span{color:var(--accent); font-weight:700;}
+  input[type=range]{width:100%; accent-color:var(--accent);}
+  .pairbox{display:flex; align-items:center; gap:8px; padding:8px; border-radius:10px; margin-bottom:6px; font-size:0.85rem; font-weight:700; background:var(--bg);}
+  .swatch{width:14px; height:14px; border-radius:3px; flex-shrink:0;}
+  .ok{color:var(--accent2);}
+  .prompt{font-size:0.85rem; color:var(--sub); background:var(--bg); padding:10px; border-radius:10px; margin-top:4px; line-height:1.4;}
+  .foot{font-size:0.7rem; color:var(--sub); text-align:center; margin-top:6px;}
+  button.reset{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; font-size:0.9rem; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📐 Garis Selari & Garis Rentas Lintang</h1>
+  <p class="sub">Alihkan bucu A dan B (garis rentas) untuk ubah kedudukan. Pilih jenis sudut untuk disorot.</p>
+
+  <div class="modes">
+    <div class="mode active" data-mode="semua">Semua Sudut</div>
+    <div class="mode" data-mode="sepadan">Sepadan</div>
+    <div class="mode" data-mode="selangseli">Selang-Seli</div>
+    <div class="mode" data-mode="pedalaman">Pedalaman</div>
+  </div>
+
+  <div class="card">
+    <div class="control">
+      <label>Kecondongan Garis Selari <span id="phiVal">0°</span></label>
+      <input type="range" id="phiSlider" min="0" max="170" step="5" value="0">
+    </div>
+    <svg id="plane" viewBox="0 0 400 400"></svg>
+  </div>
+
+  <div class="card" id="resultCard"></div>
+
+  <button class="reset" id="resetBtn">↺ Reset Kedudukan</button>
+  <div class="prompt" id="promptText"></div>
+  <div class="foot">Selaras SP 6.2.1, 6.2.2, 6.2.3 (KP2027 Matematik Tingkatan 1)</div>
+</div>
+
+<script>
+const svg = document.getElementById('plane');
+const ns = 'http://www.w3.org/2000/svg';
+const COLORS = ['#2563eb','#dc2626','#059669','#7c3aed'];
+const NEUTRAL = '#9ca3af';
+
+let mode = 'semua';
+let phi = 0; // degrees, rotation of the parallel lines
+let A = {x:130, y:40};   // transversal top handle
+let B = {x:290, y:360};  // transversal bottom handle
+let dragTarget = null;
+
+function resetAll(){
+  phi = 0;
+  document.getElementById('phiSlider').value = 0;
+  A = {x:130, y:40};
+  B = {x:290, y:360};
+  render();
+}
+
+document.querySelectorAll('.mode').forEach(m=>{
+  m.onclick = ()=>{
+    document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));
+    m.classList.add('active');
+    mode = m.dataset.mode;
+    render();
+  };
+});
+document.getElementById('phiSlider').oninput = (e)=>{
+  phi = parseFloat(e.target.value);
+  document.getElementById('phiVal').textContent = phi + '°';
+  render();
+};
+document.getElementById('resetBtn').onclick = resetAll;
+
+function el(tag, attrs){ const e=document.createElementNS(ns,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function norm(v){ const m=Math.hypot(v.x,v.y)||1; return {x:v.x/m, y:v.y/m}; }
+function sub(a,b){ return {x:a.x-b.x, y:a.y-b.y}; }
+function add(a,b){ return {x:a.x+b.x, y:a.y+b.y}; }
+function scale(v,s){ return {x:v.x*s, y:v.y*s}; }
+function dot(a,b){ return a.x*b.x + a.y*b.y; }
+function cross(a,b){ return a.x*b.y - a.y*b.x; }
+
+function computeGeometry(){
+  const rad = phi * Math.PI/180;
+  const d = {x:Math.cos(rad), y:Math.sin(rad)};       // direction of parallel lines
+  const n = {x:-Math.sin(rad), y:Math.cos(rad)};      // normal (points from line1 toward line2)
+  const center = {x:200, y:200};
+  const O1 = sub(center, scale(n,70));
+  const O2 = add(center, scale(n,70));
+
+  // line-line intersection: point O + t*d meets segment A->B
+  function intersect(O){
+    // Solve O + t*d = A + s*(B-A)
+    const AB = sub(B,A);
+    const denom = cross(d, AB);
+    if(Math.abs(denom) < 1e-6) return null;
+    const AO = sub(O, A);
+    const s = cross(d, AO) / denom;
+    return add(A, scale(AB, s));
+  }
+  const P1 = intersect(O1); // top parallel line intersection
+  const P2 = intersect(O2); // bottom parallel line intersection
+
+  const Tdir = norm(sub(B,A)); // transversal direction (A -> B)
+
+  // For a given intersection point P on line with reference point O (for side test),
+  // compute the 4 sector angles + categorize each sector.
+  function analyzeIntersection(P, O){
+    const rays = [
+      {dir: d, key:'d+'},
+      {dir: scale(d,-1), key:'d-'},
+      {dir: Tdir, key:'t+'},
+      {dir: scale(Tdir,-1), key:'t-'}
+    ];
+    rays.forEach(r=> r.angle = Math.atan2(r.dir.y, r.dir.x));
+    rays.sort((a,b)=>a.angle-b.angle);
+    const sectors = [];
+    for(let i=0;i<4;i++){
+      const r1 = rays[i], r2 = rays[(i+1)%4];
+      let a1 = r1.angle, a2 = r2.angle;
+      if(a2 < a1) a2 += Math.PI*2;
+      const sweep = (a2-a1) * 180/Math.PI;
+      const bisAngle = a1 + (a2-a1)/2;
+      const bisDir = {x:Math.cos(bisAngle), y:Math.sin(bisAngle)};
+      const sample = add(P, scale(bisDir, 30));
+      const sideAB = dot(sub(sample,O), n) >= 0 ? 'bawah' : 'atas'; // relative to shared normal
+      const sideLR = cross(Tdir, sub(sample,P)) >= 0 ? 'kanan' : 'kiri';
+      sectors.push({angle: sweep, cat: sideAB+'-'+sideLR, labelPos: add(P, scale(bisDir, 40))});
+    }
+    return sectors;
+  }
+
+  const secTop = analyzeIntersection(P1, O1);
+  const secBot = analyzeIntersection(P2, O2);
+
+  function findCat(sectors, cat){ return sectors.find(s=>s.cat===cat); }
+
+  return {O1,O2,P1,P2,d,n,secTop,secBot,findCat};
+}
+
+function render(){
+  const g = computeGeometry();
+  svg.innerHTML = '';
+
+  // draw the two parallel lines (long enough to span canvas)
+  [ {O:g.O1}, {O:g.O2} ].forEach(({O})=>{
+    const p1 = sub(O, scale(g.d,300));
+    const p2 = add(O, scale(g.d,300));
+    svg.appendChild(el('line',{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y, stroke:'var(--sub)', 'stroke-width':2}));
+  });
+  // arrowheads to indicate "selari" (small marks) - simple double-tick at midpoint of each line
+  [g.O1, g.O2].forEach(O=>{
+    const perp = {x:-g.d.y, y:g.d.x};
+    const m1 = add(O, scale(perp,6));
+    const m2 = sub(O, scale(perp,6));
+    svg.appendChild(el('line',{x1:m1.x+g.d.x*5,y1:m1.y+g.d.y*5,x2:m2.x+g.d.x*5,y2:m2.y+g.d.y*5, stroke:'var(--sub)', 'stroke-width':2}));
+    svg.appendChild(el('line',{x1:m1.x-g.d.x*5,y1:m1.y-g.d.y*5,x2:m2.x-g.d.x*5,y2:m2.y-g.d.y*5, stroke:'var(--sub)', 'stroke-width':2}));
+  });
+
+  // transversal line
+  svg.appendChild(el('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y, stroke:'var(--accent)', 'stroke-width':2.5}));
+
+  // determine highlight pairs based on mode
+  let pairs = []; // {cat1, cat2, relation:'='|'+', color}
+  if(mode==='sepadan'){
+    ['atas-kiri','atas-kanan','bawah-kiri','bawah-kanan'].forEach((cat,i)=>{
+      pairs.push({cat1:cat, cat2:cat, relation:'=', color:COLORS[i%COLORS.length]});
+    });
+  } else if(mode==='selangseli'){
+    pairs.push({cat1:'bawah-kiri', cat2:'atas-kanan', relation:'=', color:COLORS[0]});
+    pairs.push({cat1:'bawah-kanan', cat2:'atas-kiri', relation:'=', color:COLORS[1]});
+  } else if(mode==='pedalaman'){
+    pairs.push({cat1:'bawah-kiri', cat2:'atas-kiri', relation:'+', color:COLORS[0]});
+    pairs.push({cat1:'bawah-kanan', cat2:'atas-kanan', relation:'+', color:COLORS[1]});
+  }
+
+  // assign color per sector based on pairs list, else neutral
+  function colorFor(sectors, whichSide){
+    sectors.forEach(s=>{
+      s.color = NEUTRAL;
+      pairs.forEach(p=>{
+        const catHere = whichSide==='top' ? p.cat1 : p.cat2;
+        if(s.cat === catHere) s.color = p.color;
+      });
+    });
+  }
+  colorFor(g.secTop,'top');
+  colorFor(g.secBot,'bot');
+
+  // draw angle labels
+  [g.secTop, g.secBot].forEach(sectors=>{
+    sectors.forEach(s=>{
+      const t = el('text',{x:s.labelPos.x, y:s.labelPos.y, 'text-anchor':'middle','font-size':'13','font-weight':'800', fill:s.color});
+      t.textContent = s.angle.toFixed(0)+'°';
+      svg.appendChild(t);
+    });
+  });
+
+  // draw intersection points
+  [g.P1,g.P2].forEach(P=>{
+    svg.appendChild(el('circle',{cx:P.x,cy:P.y,r:4,fill:'var(--text)'}));
+  });
+
+  // draggable handles A, B
+  [{p:A,label:'A'},{p:B,label:'B'}].forEach(({p,label})=>{
+    svg.appendChild(el('circle',{cx:p.x,cy:p.y,r:11,fill:'var(--card)',stroke:'var(--accent)','stroke-width':3, style:'cursor:grab;'}));
+    const lab = el('text',{x:p.x, y:p.y-16, 'text-anchor':'middle','font-size':'12','font-weight':'700', fill:'var(--sub)'});
+    lab.textContent = label;
+    svg.appendChild(lab);
+  });
+
+  // results panel
+  const rc = document.getElementById('resultCard');
+  if(mode==='semua'){
+    rc.innerHTML = '<div style="font-size:0.85rem;color:var(--sub);">Semua 8 sudut dipaparkan. Pilih mod di atas untuk sorot pasangan sudut tertentu dan lihat hubungannya.</div>';
+  } else {
+    let html = '';
+    pairs.forEach((p,i)=>{
+      const s1 = g.findCat(g.secTop, p.cat1);
+      const s2 = g.findCat(g.secBot, p.cat2);
+      const v1 = s1.angle, v2 = s2.angle;
+      let confirm;
+      if(p.relation==='='){
+        confirm = Math.abs(v1-v2)<0.5 ? `${v1.toFixed(1)}° = ${v2.toFixed(1)}° ✓ SAMA` : `${v1.toFixed(1)}° ≠ ${v2.toFixed(1)}°`;
+      } else {
+        const total = v1+v2;
+        confirm = Math.abs(total-180)<0.5 ? `${v1.toFixed(1)}° + ${v2.toFixed(1)}° = 180° ✓` : `${v1.toFixed(1)}° + ${v2.toFixed(1)}° = ${total.toFixed(1)}°`;
+      }
+      html += `<div class="pairbox"><span class="swatch" style="background:${p.color}"></span>Pasangan ${i+1}: <span class="ok">${confirm}</span></div>`;
+    });
+    rc.innerHTML = html;
+  }
+
+  const prompts = {
+    semua: 'Perhatikan lapan sudut yang terbentuk di dua titik persilangan. Cuba ubah kecondongan garis rentas dan garis selari.',
+    sepadan: 'Sudut Sepadan: sudut pada kedudukan sepadan (contoh: kedua-dua di atas-kanan) di setiap persilangan SENTIASA SAMA apabila garis selari benar-benar selari.',
+    selangseli: 'Sudut Selang-Seli: sudut pedalaman (antara dua garis selari) yang berada pada SEBELAH BERLAWANAN garis rentas SENTIASA SAMA.',
+    pedalaman: 'Sudut Pedalaman: sudut pedalaman yang berada pada SEBELAH SAMA garis rentas SENTIASA berjumlah 180°.'
+  };
+  document.getElementById('promptText').textContent = prompts[mode];
+}
+
+function svgPoint(evt){
+  const rect = svg.getBoundingClientRect();
+  const scaleX = 400/rect.width, scaleY = 400/rect.height;
+  return { x:(evt.clientX-rect.left)*scaleX, y:(evt.clientY-rect.top)*scaleY };
+}
+
+svg.addEventListener('pointerdown',(e)=>{
+  const p = svgPoint(e);
+  const dA = Math.hypot(p.x-A.x, p.y-A.y);
+  const dB = Math.hypot(p.x-B.x, p.y-B.y);
+  if(dA<30 && dA<dB){ dragTarget='A'; svg.setPointerCapture(e.pointerId); }
+  else if(dB<30){ dragTarget='B'; svg.setPointerCapture(e.pointerId); }
+});
+svg.addEventListener('pointermove',(e)=>{
+  if(!dragTarget) return;
+  const p = svgPoint(e);
+  const clamped = {x:Math.max(10,Math.min(390,p.x)), y:Math.max(10,Math.min(390,p.y))};
+  if(dragTarget==='A') A=clamped; else B=clamped;
+  render();
+});
+svg.addEventListener('pointerup',()=>{ dragTarget=null; });
+svg.addEventListener('pointercancel',()=>{ dragTarget=null; });
+
+render();
+</script>
+</body>
+</html>

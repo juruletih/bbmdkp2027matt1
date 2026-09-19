@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Wizard Inkuiri Statistik</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --border:#e5e7eb; --danger:#dc2626;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:560px; width:100%;}
+  h1{font-size:1.1rem; margin:0 0 10px; text-align:center;}
+  .stepper{display:flex; gap:4px; margin-bottom:12px;}
+  .step{flex:1; height:6px; border-radius:4px; background:var(--border);}
+  .step.done{background:var(--accent2);} .step.active{background:var(--accent);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px;}
+  h2{font-size:1rem; margin:0 0 4px; color:var(--accent);}
+  p.desc{font-size:0.82rem; color:var(--sub); margin:0 0 10px;}
+  label{font-size:0.83rem; font-weight:600; display:block; margin:8px 0 4px;}
+  input[type=text], input[type=number], textarea, select{
+    width:100%; padding:10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:0.9rem;
+  }
+  textarea{resize:vertical;}
+  button{cursor:pointer; font-weight:700; border:none; border-radius:10px;}
+  .primary{background:var(--accent); color:#fff; padding:12px 16px; font-size:0.9rem; width:100%;}
+  .secondary{background:var(--bg); color:var(--text); border:1px solid var(--border); padding:10px; font-size:0.85rem;}
+  .navrow{display:flex; gap:8px; margin-top:12px;}
+  .navrow button{flex:1;}
+  .datatypes{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;}
+  .dtbtn{padding:12px 6px; border-radius:10px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-size:0.78rem; text-align:center;}
+  .dtbtn.active{border-color:var(--accent); background:rgba(37,99,235,0.1); color:var(--accent);}
+  .rowentry{display:flex; gap:6px; margin-bottom:6px; align-items:center;}
+  .rowentry input{flex:1;}
+  .delbtn{width:34px; height:38px; border-radius:8px; background:rgba(220,38,38,0.1); color:var(--danger); font-size:1rem; flex-shrink:0;}
+  table.freq{width:100%; border-collapse:collapse; font-size:0.82rem; margin-top:8px;}
+  table.freq th, table.freq td{border:1px solid var(--border); padding:6px; text-align:center;}
+  table.freq th{background:var(--bg);}
+  .charttypes{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .ctbtn{padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.78rem;}
+  .ctbtn.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  canvas{max-width:100%;}
+  .stemtable{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:8px;}
+  .stemtable td{border:1px solid var(--border); padding:6px;}
+  .stemtable td:first-child{font-weight:700; background:var(--bg); width:50px; text-align:center;}
+  .note{font-size:0.75rem; color:var(--sub); margin-top:6px;}
+  .infobox{background:rgba(37,99,235,0.08); border-left:3px solid var(--accent); border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:0.8rem; line-height:1.5;}
+  .infobox p, .infobox ul{margin:4px 0 0;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Wizard Inkuiri Statistik</h1>
+  <div class="stepper" id="stepper"></div>
+
+  <!-- FASA 1 -->
+  <div class="card step-panel" id="panel1">
+    <h2>Fasa 1: Jana Soalan Statistik</h2>
+    <p class="desc">Soalan statistik ialah soalan yang boleh dijawab dengan mengumpul dan menganalisis data (jawapan berbeza-beza antara individu).</p>
+    <div class="infobox">
+      <b>ℹ️ Apa bezanya soalan statistik dengan soalan biasa?</b>
+      <p>Soalan biasa: "Umur saya berapa?" → jawapan TETAP, tiada variasi.<br>
+      Soalan statistik: "Berapakah umur murid dalam kelas saya?" → jawapan BERBEZA untuk setiap murid, perlu kumpul banyak data untuk jawab.</p>
+    </div>
+    <label>Soalan Statistik Anda</label>
+    <input type="text" id="f1_soalan" placeholder="Cth: Apakah sukan kegemaran murid Tingkatan 1?">
+    <p class="note">Templat: "Apakah ___ yang paling ___ dalam kalangan ___?"</p>
+  </div>
+
+  <!-- FASA 2 -->
+  <div class="card step-panel hidden" id="panel2">
+    <h2>Fasa 2: Rancang Pengumpulan Data</h2>
+    <div class="infobox">
+      <b>ℹ️ Apa maksud setiap kaedah?</b>
+      <ul style="margin:4px 0; padding-left:18px;">
+        <li><b>Tinjauan</b> — tanya soalan kepada ramai orang (borang/soal selidik)</li>
+        <li><b>Pemerhatian</b> — perhati & catat tanpa bertanya (cth: kira kereta lalu)</li>
+        <li><b>Eksperimen</b> — uji sesuatu dan rekod hasil (cth: tumbesaran tumbuhan)</li>
+        <li><b>Rekod Sedia Ada</b> — guna data yang sudah wujud (cth: rekod kehadiran)</li>
+      </ul>
+    </div>
+    <label>Kaedah Pengumpulan</label>
+    <select id="f2_kaedah">
+      <option>Tinjauan (Soal Selidik)</option>
+      <option>Pemerhatian</option>
+      <option>Eksperimen</option>
+      <option>Rekod Sedia Ada</option>
+    </select>
+    <label>Sasaran / Saiz Sampel</label>
+    <input type="text" id="f2_sampel" placeholder="Cth: 30 orang murid Tingkatan 1">
+  </div>
+
+  <!-- FASA 3 -->
+  <div class="card step-panel hidden" id="panel3">
+    <h2>Fasa 3: Kumpul & Urus Data</h2>
+    <p class="desc">Pilih jenis data anda dahulu:</p>
+    <div class="infobox">
+      <b>ℹ️ Macam mana nak tahu jenis data saya?</b>
+      <p>Tanya diri sendiri: <b>Jawapan berbentuk PERKATAAN atau NOMBOR?</b><br>
+      • Perkataan (cth: nama sukan, warna) → pilih <b>Kategori</b><br>
+      • Nombor (cth: markah, tinggi) → pilih <b>Numerik</b><br>
+      • Ada DUA soalan sekali gus? → pilih jenis "Dua Pemboleh Ubah"</p>
+    </div>
+    <div class="datatypes" id="dataTypeButtons"></div>
+    <p class="note" id="dataTypeDesc"></p>
+    <div id="dataEntryArea"></div>
+    <div class="navrow">
+      <button class="secondary" id="addRowBtn">+ Tambah Baris</button>
+      <button class="secondary" id="sampleDataBtn">✨ Isi Contoh Data</button>
+    </div>
+    <h3 style="font-size:0.85rem;margin-top:14px;">Jadual Kekerapan (Auto)</h3>
+    <p class="note">Kekerapan = berapa kali sesuatu nilai muncul dalam data anda.</p>
+    <div id="freqTableArea"></div>
+  </div>
+
+  <!-- FASA 4 -->
+  <div class="card step-panel hidden" id="panel4">
+    <h2>Fasa 4: Perwakilan Data</h2>
+    <p class="desc">Pilih jenis carta. Cuba tukar antara jenis untuk lihat perbezaan!</p>
+    <div class="charttypes" id="chartTypeButtons"></div>
+    <p class="note" id="chartTypeDesc"></p>
+    <div id="chartArea"></div>
+  </div>
+
+  <!-- FASA 5 -->
+  <div class="card step-panel hidden" id="panel5">
+    <h2>Fasa 5: Tafsiran & Kesimpulan</h2>
+    <div class="infobox">
+      <b>ℹ️ Beza Tafsiran vs Kesimpulan</b>
+      <p><b>Tafsiran</b> = apa yang carta TUNJUKKAN (cth: "Isnin ada bilangan tertinggi")<br>
+      <b>Kesimpulan</b> = JAWAPAN kepada soalan statistik Fasa 1 (cth: "Hari Isnin adalah hari paling sibuk")</p>
+    </div>
+    <label>Tafsiran Data</label>
+    <textarea id="f5_tafsir" rows="3" placeholder="Apa yang anda perhatikan daripada carta?"></textarea>
+    <label>Kesimpulan</label>
+    <textarea id="f5_kesimpulan" rows="3" placeholder="Apakah jawapan kepada soalan statistik anda?"></textarea>
+    <button class="primary" id="pdfBtn" style="margin-top:10px;">📄 Jana Laporan PDF</button>
+    <p class="note" id="pdfStatus"></p>
+  </div>
+
+  <div class="navrow">
+    <button class="secondary" id="backBtn">← Kembali</button>
+    <button class="primary" id="nextBtn">Seterusnya →</button>
+  </div>
+</div>
+
+<script>
+let step = 1;
+const TOTAL_STEPS = 5;
+
+const DATA_TYPES = {
+  kategori: {label:'Kategori Tunggal', cols:['Kategori'], desc:'Contoh: sukan kegemaran, warna kegemaran — jawapan berbentuk perkataan.'},
+  numerik: {label:'Numerik Tunggal', cols:['Label','Nilai'], desc:'Contoh: markah ujian, bilangan pelawat setiap hari — jawapan berbentuk nombor.'},
+  pasangan: {label:'Dua Pemboleh Ubah (Nombor)', cols:['Nilai X','Nilai Y'], desc:'Contoh: tinggi vs berat badan — dua NOMBOR untuk setiap orang, nak lihat perkaitan.'},
+  kumpulan: {label:'Dua Pemboleh Ubah (Kategori)', cols:['Kumpulan','Kategori'], desc:'Contoh: kelas vs sukan kegemaran — bandingkan kategori antara beberapa kumpulan.'}
+};
+const CHART_OPTIONS = {
+  kategori:[{id:'pai',label:'Carta Pai', desc:'Tunjuk bahagian drpd keseluruhan (peratus). Sesuai bila ada beberapa kategori sahaja.'}],
+  numerik:[
+    {id:'garis',label:'Graf Garis', desc:'Tunjuk perubahan nilai mengikut turutan/masa (cth: setiap hari dalam seminggu).'},
+    {id:'histogram',label:'Histogram', desc:'Kumpulkan nombor kepada selang (cth: 0-10, 11-20). Sesuai untuk data BANYAK & selanjar.'},
+    {id:'plotTitik',label:'Plot Titik', desc:'Setiap data = satu titik di atas garis nombor. Sesuai untuk data SEDIKIT, nampak taburan jelas.'},
+    {id:'plotBatang',label:'Plot Batang-Daun', desc:'Pisahkan nombor kepada "batang" (digit depan) & "daun" (digit akhir). Kekal nilai SEBENAR data.'}
+  ],
+  pasangan:[{id:'sebar',label:'Graf Sebar', desc:'Setiap titik = satu pasangan (X,Y). Sesuai untuk lihat ADAKAH dua benda berkait.'}],
+  kumpulan:[
+    {id:'palangKelompok',label:'Palang Berkelompok', desc:'Bar berasingan bersebelahan — mudah BANDING nilai antara kumpulan.'},
+    {id:'palangTindan',label:'Palang Bertindan', desc:'Bar bertindan atas satu sama lain — mudah lihat JUMLAH keseluruhan setiap kumpulan.'}
+  ]
+};
+const SAMPLE_DATA = {
+  kategori:[{a:'Bola Sepak'},{a:'Badminton'},{a:'Bola Sepak'},{a:'Ping Pong'},{a:'Badminton'},{a:'Bola Sepak'},{a:'Badminton'},{a:'Ping Pong'},{a:'Bola Sepak'},{a:'Bola Sepak'}],
+  numerik:[{a:'Isnin',b:'12'},{a:'Selasa',b:'15'},{a:'Rabu',b:'9'},{a:'Khamis',b:'18'},{a:'Jumaat',b:'20'}],
+  pasangan:[{a:'2',b:'5'},{a:'3',b:'7'},{a:'4',b:'8'},{a:'5',b:'11'},{a:'6',b:'13'},{a:'7',b:'15'}],
+  kumpulan:[{a:'Tingkatan 1A',b:'Bola Sepak'},{a:'Tingkatan 1A',b:'Badminton'},{a:'Tingkatan 1A',b:'Bola Sepak'},{a:'Tingkatan 1B',b:'Badminton'},{a:'Tingkatan 1B',b:'Badminton'},{a:'Tingkatan 1B',b:'Bola Sepak'}]
+};
+
+let currentDataType = 'kategori';
+let rows = [{a:'',b:''}];
+let currentChartType = 'pai';
+let chartInstance = null;
+
+function renderStepper(){
+  const s=document.getElementById('stepper');
+  s.innerHTML='';
+  for(let i=1;i<=TOTAL_STEPS;i++){
+    const d=document.createElement('div');
+    d.className='step'+(i<step?' done':i===step?' active':'');
+    s.appendChild(d);
+  }
+}
+
+function showStep(){
+  for(let i=1;i<=TOTAL_STEPS;i++){
+    document.getElementById('panel'+i).classList.toggle('hidden', i!==step);
+  }
+  document.getElementById('backBtn').style.visibility = step===1?'hidden':'visible';
+  document.getElementById('nextBtn').textContent = step===TOTAL_STEPS ? 'Selesai' : 'Seterusnya →';
+  renderStepper();
+  if(step===3){ renderDataTypeButtons(); renderDataEntry(); renderFreqTable(); }
+  if(step===4){ renderChartTypeButtons(); renderChart(); }
+}
+
+document.getElementById('backBtn').onclick=()=>{ if(step>1){ step--; showStep(); } };
+document.getElementById('nextBtn').onclick=()=>{ if(step<TOTAL_STEPS){ step++; showStep(); } };
+
+function renderDataTypeButtons(){
+  const c=document.getElementById('dataTypeButtons');
+  c.innerHTML='';
+  Object.keys(DATA_TYPES).forEach(key=>{
+    const b=document.createElement('div');
+    b.className='dtbtn'+(key===currentDataType?' active':'');
+    b.textContent=DATA_TYPES[key].label;
+    b.onclick=()=>{
+      currentDataType=key;
+      rows=[{a:'',b:''}];
+      currentChartType = CHART_OPTIONS[key][0].id;
+      renderDataTypeButtons(); renderDataEntry(); renderFreqTable();
+    };
+    c.appendChild(b);
+  });
+  document.getElementById('dataTypeDesc').textContent = '💡 ' + DATA_TYPES[currentDataType].desc;
+}
+
+function renderDataEntry(){
+  const cols = DATA_TYPES[currentDataType].cols;
+  const area = document.getElementById('dataEntryArea');
+  area.innerHTML='';
+  rows.forEach((r,i)=>{
+    const div=document.createElement('div');
+    div.className='rowentry';
+    const inpA=document.createElement('input');
+    inpA.type='text'; inpA.placeholder=cols[0]; inpA.value=r.a;
+    inpA.oninput=(e)=>{ r.a=e.target.value; renderFreqTable(); };
+    div.appendChild(inpA);
+    if(cols.length>1){
+      const inpB=document.createElement('input');
+      inpB.type='text'; inpB.placeholder=cols[1]; inpB.value=r.b;
+      inpB.oninput=(e)=>{ r.b=e.target.value; renderFreqTable(); };
+      div.appendChild(inpB);
+    }
+    const del=document.createElement('button');
+    del.className='delbtn'; del.textContent='×';
+    del.onclick=()=>{ rows.splice(i,1); if(rows.length===0) rows=[{a:'',b:''}]; renderDataEntry(); renderFreqTable(); };
+    div.appendChild(del);
+    area.appendChild(div);
+  });
+}
+document.getElementById('addRowBtn').onclick=()=>{ rows.push({a:'',b:''}); renderDataEntry(); };
+document.getElementById('sampleDataBtn').onclick=()=>{
+  rows = SAMPLE_DATA[currentDataType].map(r=>({a:r.a, b:r.b||''}));
+  renderDataEntry(); renderFreqTable();
+};
+
+function validRows(){ return rows.filter(r=> r.a.trim()!==''); }
+
+function renderFreqTable(){
+  const area = document.getElementById('freqTableArea');
+  const vr = validRows();
+  if(vr.length===0){ area.innerHTML='<p class="note">Masukkan data untuk lihat jadual kekerapan.</p>'; return; }
+
+  if(currentDataType==='kategori'){
+    const counts={};
+    vr.forEach(r=> counts[r.a]=(counts[r.a]||0)+1);
+    let h='<table class="freq"><tr><th>Kategori</th><th>Kekerapan</th></tr>';
+    Object.keys(counts).forEach(k=> h+=`<tr><td>${k}</td><td>${counts[k]}</td></tr>`);
+    area.innerHTML=h+'</table>';
+  } else if(currentDataType==='numerik'){
+    let h='<table class="freq"><tr><th>Label</th><th>Nilai</th></tr>';
+    vr.forEach(r=> h+=`<tr><td>${r.a}</td><td>${r.b}</td></tr>`);
+    area.innerHTML=h+'</table>';
+  } else if(currentDataType==='pasangan'){
+    let h='<table class="freq"><tr><th>X</th><th>Y</th></tr>';
+    vr.forEach(r=> h+=`<tr><td>${r.a}</td><td>${r.b}</td></tr>`);
+    area.innerHTML=h+'</table>';
+  } else if(currentDataType==='kumpulan'){
+    const groups=[...new Set(vr.map(r=>r.a))];
+    const cats=[...new Set(vr.map(r=>r.b))];
+    let h='<table class="freq"><tr><th>Kumpulan</th>'+cats.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+    groups.forEach(g=>{
+      h+=`<tr><td>${g}</td>`+cats.map(c=> `<td>${vr.filter(r=>r.a===g&&r.b===c).length}</td>`).join('')+'</tr>';
+    });
+    area.innerHTML=h+'</table>';
+  }
+}
+
+function renderChartTypeButtons(){
+  const c=document.getElementById('chartTypeButtons');
+  c.innerHTML='';
+  CHART_OPTIONS[currentDataType].forEach(opt=>{
+    const b=document.createElement('div');
+    b.className='ctbtn'+(opt.id===currentChartType?' active':'');
+    b.textContent=opt.label;
+    b.onclick=()=>{ currentChartType=opt.id; renderChartTypeButtons(); renderChart(); };
+    c.appendChild(b);
+  });
+  const opt = CHART_OPTIONS[currentDataType].find(o=>o.id===currentChartType);
+  document.getElementById('chartTypeDesc').textContent = opt ? '💡 ' + opt.desc : '';
+}
+
+function destroyChart(){ if(chartInstance){ chartInstance.destroy(); chartInstance=null; } }
+
+function renderChart(){
+  const area = document.getElementById('chartArea');
+  destroyChart();
+  area.innerHTML='';
+  const vr = validRows();
+  if(vr.length===0){ area.innerHTML='<p class="note">Tiada data. Sila isi data di Fasa 3.</p>'; return; }
+
+  if(currentChartType==='pai'){
+    const counts={}; vr.forEach(r=>counts[r.a]=(counts[r.a]||0)+1);
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'pie', data:{labels:Object.keys(counts), datasets:[{data:Object.values(counts), backgroundColor:['#2563eb','#dc2626','#059669','#7c3aed','#d97706','#0891b2']}]}});
+  }
+  else if(currentChartType==='garis'){
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'line', data:{labels:vr.map(r=>r.a), datasets:[{label:'Nilai', data:vr.map(r=>parseFloat(r.b)||0), borderColor:'#2563eb', backgroundColor:'#2563eb'}]}});
+  }
+  else if(currentChartType==='histogram'){
+    const widthInput = document.createElement('div');
+    widthInput.innerHTML = '<label>Lebar Selang</label><p class="note" style="margin-top:-2px;">💡 Saiz setiap "kumpulan" nombor. Cth: lebar 5 bermaksud kumpulan 0-5, 5-10, 10-15...</p><input type="number" id="binWidth" value="5" min="1">';
+    area.appendChild(widthInput);
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    function draw(){
+      const w = parseFloat(document.getElementById('binWidth').value)||5;
+      const nums = vr.map(r=>parseFloat(r.b)).filter(n=>!isNaN(n));
+      const min=Math.floor(Math.min(...nums)/w)*w, max=Math.ceil(Math.max(...nums)/w)*w;
+      const bins=[]; const labels=[];
+      for(let b=min;b<max;b+=w){ bins.push(0); labels.push(b+'-'+(b+w)); }
+      nums.forEach(n=>{ let idx=Math.min(Math.floor((n-min)/w), bins.length-1); bins[idx]++; });
+      destroyChart();
+      chartInstance = new Chart(canvas, {type:'bar', data:{labels, datasets:[{label:'Kekerapan', data:bins, backgroundColor:'#2563eb', barPercentage:1, categoryPercentage:1}]}, options:{scales:{x:{grid:{offset:false}}}}});
+    }
+    document.getElementById('binWidth').oninput = draw;
+    draw();
+  }
+  else if(currentChartType==='plotTitik'){
+    const nums = vr.map(r=>parseFloat(r.b)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+    const counts={}; nums.forEach(n=>counts[n]=(counts[n]||0)+1);
+    const canvas=document.createElement('canvas'); canvas.width=500; canvas.height=260; canvas.id='dotcanvas';
+    area.appendChild(canvas);
+    const ctx=canvas.getContext('2d');
+    const min=Math.min(...nums), max=Math.max(...nums);
+    const range = max-min || 1;
+    const padding=40;
+    ctx.strokeStyle='#888888';
+    ctx.beginPath(); ctx.moveTo(padding,220); ctx.lineTo(canvas.width-20,220); ctx.stroke();
+    Object.keys(counts).forEach(val=>{
+      const x = padding + ((val-min)/range)*(canvas.width-padding-40);
+      ctx.fillStyle='#2563eb';
+      for(let i=0;i<counts[val];i++){
+        ctx.beginPath();
+        ctx.arc(x, 210-i*16, 6, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle='#1a1d29';
+      ctx.font='11px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(val, x, 234);
+    });
+  }
+  else if(currentChartType==='plotBatang'){
+    const nums = vr.map(r=>parseInt(r.b)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+    const stems={};
+    nums.forEach(n=>{ const s=Math.floor(n/10); const l=n%10; if(!stems[s]) stems[s]=[]; stems[s].push(l); });
+    let h='<table class="stemtable"><tr><td>Batang</td><td>Daun</td></tr>';
+    Object.keys(stems).sort((a,b)=>a-b).forEach(s=>{
+      h += `<tr><td>${s}</td><td>${stems[s].sort((a,b)=>a-b).join(' ')}</td></tr>`;
+    });
+    h+='</table><p class="note">Kunci: Batang | Daun → cth Batang 3, Daun 4 = 34</p>';
+    area.innerHTML = h;
+  }
+  else if(currentChartType==='sebar'){
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'scatter', data:{datasets:[{label:'Data', data:vr.map(r=>({x:parseFloat(r.a)||0,y:parseFloat(r.b)||0})), backgroundColor:'#2563eb'}]}});
+  }
+  else if(currentChartType==='palangKelompok' || currentChartType==='palangTindan'){
+    const groups=[...new Set(vr.map(r=>r.a))];
+    const cats=[...new Set(vr.map(r=>r.b))];
+    const colors=['#2563eb','#dc2626','#059669','#7c3aed','#d97706'];
+    const datasets = cats.map((c,i)=>({
+      label:c,
+      data: groups.map(g=> vr.filter(r=>r.a===g&&r.b===c).length),
+      backgroundColor: colors[i%colors.length],
+      stack: currentChartType==='palangTindan' ? 'stack1' : undefined
+    }));
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'bar', data:{labels:groups, datasets}, options:{scales: currentChartType==='palangTindan' ? {x:{stacked:true},y:{stacked:true}} : {}}});
+  }
+}
+
+document.getElementById('pdfBtn').onclick = async ()=>{
+  const status = document.getElementById('pdfStatus');
+  status.textContent = 'Menjana PDF...';
+  try{
+    const jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if(!jsPDFCtor){ status.textContent = 'Pustaka PDF gagal dimuatkan (mungkin isu rangkaian/WiFi sekolah). Sila cuba semula atau tukar rangkaian.'; return; }
+    const doc = new jsPDFCtor();
+    let y = 15;
+    doc.setFontSize(16); doc.text('Laporan Inkuiri Statistik', 15, y); y+=10;
+    doc.setFontSize(11);
+    doc.text('Fasa 1: Soalan Statistik', 15, y); y+=6;
+    doc.setFontSize(10);
+    const soalan = document.getElementById('f1_soalan').value || '(tiada)';
+    doc.text(doc.splitTextToSize(soalan, 180), 15, y); y+=12;
+
+    doc.setFontSize(11); doc.text('Fasa 2: Rancangan', 15, y); y+=6;
+    doc.setFontSize(10);
+    doc.text('Kaedah: '+document.getElementById('f2_kaedah').value, 15, y); y+=6;
+    doc.text('Sampel: '+(document.getElementById('f2_sampel').value||'(tiada)'), 15, y); y+=10;
+
+    doc.setFontSize(11); doc.text('Fasa 3: Jadual Kekerapan', 15, y); y+=6;
+    doc.setFontSize(9);
+    const freqHTML = document.getElementById('freqTableArea').innerText;
+    doc.text(doc.splitTextToSize(freqHTML, 180), 15, y); y+=Math.min(40, freqHTML.split('\n').length*5+5);
+
+    if(y>230){ doc.addPage(); y=15; }
+    doc.setFontSize(11); doc.text('Fasa 4: Perwakilan Data ('+currentChartType+')', 15, y); y+=8;
+    const canvasEl = document.querySelector('#chartArea canvas');
+    if(canvasEl){
+      const imgData = canvasEl.toDataURL('image/png');
+      doc.addImage(imgData, 'PNG', 15, y, 170, 90);
+      y += 95;
+    } else {
+      const stemHTML = document.querySelector('#chartArea')?.innerText || '';
+      doc.setFontSize(9);
+      doc.text(doc.splitTextToSize(stemHTML, 180), 15, y); y+=40;
+    }
+
+    if(y>240){ doc.addPage(); y=15; }
+    doc.setFontSize(11); doc.text('Fasa 5: Tafsiran & Kesimpulan', 15, y); y+=7;
+    doc.setFontSize(10);
+    doc.text(doc.splitTextToSize('Tafsiran: '+(document.getElementById('f5_tafsir').value||'(tiada)'), 180), 15, y); y+=16;
+    doc.text(doc.splitTextToSize('Kesimpulan: '+(document.getElementById('f5_kesimpulan').value||'(tiada)'), 180), 15, y);
+
+    const blob = doc.output('blob');
+    const downloads = await claude.use('downloads');
+    if(downloads){
+      const result = await downloads.save({filename:'laporan-inkuiri-statistik.pdf', data: blob});
+      status.textContent = result.status==='saved' ? '✓ PDF berjaya disimpan!' : '✓ PDF dihantar.';
+    } else {
+      status.textContent = 'Fungsi muat turun tidak tersedia pada paparan ini.';
+    }
+  }catch(e){
+    status.textContent = 'Ralat menjana PDF: '+e.message;
+  }
+};
+
+showStep();
+</script>
+</body>
+</html>

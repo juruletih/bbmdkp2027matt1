@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Geometri Dinamik: Jenis Sudut & Garis Bersilang</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --border:#e5e7eb; --neutral:#9ca3af; --warn:#d97706;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:540px; width:100%;}
+  h1{font-size:1.1rem; margin:0 0 2px;}
+  p.sub{color:var(--sub); margin:0 0 10px; font-size:0.85rem;}
+  .tabs{display:flex; gap:6px; margin-bottom:10px;}
+  .tab{flex:1; padding:9px; text-align:center; border-radius:10px; border:1px solid var(--border); background:var(--card); font-weight:600; font-size:0.85rem; cursor:pointer;}
+  .tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;}
+  svg{width:100%; height:auto; display:block; touch-action:none; background:var(--bg); border-radius:10px;}
+  .pairbox{display:flex; align-items:center; gap:8px; padding:8px; border-radius:10px; margin-bottom:6px; font-size:0.85rem; font-weight:700; background:var(--bg);}
+  .swatch{width:14px; height:14px; border-radius:3px; flex-shrink:0;}
+  .ok{color:var(--accent2);}
+  .modes{display:flex; gap:6px; margin-bottom:10px;}
+  .mode{flex:1; padding:9px 4px; text-align:center; border-radius:10px; border:1px solid var(--border); background:var(--card); font-weight:600; font-size:0.78rem; cursor:pointer;}
+  .mode.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .prompt{font-size:0.85rem; color:var(--sub); background:var(--bg); padding:10px; border-radius:10px; margin-top:4px; line-height:1.4;}
+  .warn{font-size:0.78rem; color:var(--warn); background:rgba(217,119,6,0.1); padding:8px 10px; border-radius:8px; margin-bottom:10px;}
+  button.reset,button.snap{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; font-size:0.88rem; cursor:pointer; margin-bottom:8px;}
+  .foot{font-size:0.7rem; color:var(--sub); text-align:center; margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📐 Jenis Sudut & Garis Bersilang</h1>
+  <div class="tabs">
+    <div class="tab active" id="tabA">Garis Bersilang</div>
+    <div class="tab" id="tabB">Bahagi Sudut</div>
+  </div>
+
+  <div id="panelA">
+    <p class="sub">Alihkan bucu H untuk putar garis kedua. Perhatikan sudut bertentang bucu dan sudut bersebelahan.</p>
+    <div class="card">
+      <svg id="planeA" viewBox="0 0 400 400"></svg>
+    </div>
+    <button class="snap" id="snapBtn">📐 Jadikan Serenjang (90°)</button>
+    <div class="card" id="resultA"></div>
+    <button class="reset" id="resetA">↺ Reset</button>
+    <div class="prompt">Sudut bertentang bucu (warna sepadan) SENTIASA SAMA. Sudut bersebelahan (kongsi satu garis lurus) SENTIASA berjumlah 180°.</div>
+  </div>
+
+  <div id="panelB" style="display:none;">
+    <div class="warn">⚠️ Label "pelengkap/penggenap/konjugat" perlu disahkan oleh guru mengikut glosari rasmi KPM — tidak dinyatakan dalam dokumen kurikulum yang dirujuk.</div>
+    <div class="modes">
+      <div class="mode active" data-sum="180">Garis Lurus (180°)</div>
+      <div class="mode" data-sum="90">Sudut Tegak (90°)</div>
+      <div class="mode" data-sum="360">Putaran Lengkap (360°)</div>
+    </div>
+    <p class="sub">Alihkan bucu R untuk bahagikan sudut kepada dua bahagian.</p>
+    <div class="card">
+      <svg id="planeB" viewBox="0 0 400 400"></svg>
+    </div>
+    <div class="card" id="resultB"></div>
+    <button class="reset" id="resetB">↺ Reset</button>
+    <div class="prompt" id="promptB"></div>
+  </div>
+
+  <div class="foot">Selaras SP 6.1.3, 6.1.4, 6.1.5 (KP2027 Matematik Tingkatan 1)</div>
+</div>
+
+<script>
+const ns='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const e=document.createElementNS(ns,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+const COLORS=['#2563eb','#dc2626'];
+const NEUTRAL='#9ca3af';
+
+document.getElementById('tabA').onclick=()=>{
+  document.getElementById('tabA').classList.add('active');
+  document.getElementById('tabB').classList.remove('active');
+  document.getElementById('panelA').style.display='block';
+  document.getElementById('panelB').style.display='none';
+};
+document.getElementById('tabB').onclick=()=>{
+  document.getElementById('tabB').classList.add('active');
+  document.getElementById('tabA').classList.remove('active');
+  document.getElementById('panelB').style.display='block';
+  document.getElementById('panelA').style.display='none';
+};
+
+/* ---------- PANEL A: Garis Bersilang ---------- */
+const svgA = document.getElementById('planeA');
+const O = {x:200,y:200};
+let H = {x:330,y:110};
+let dragA=false;
+
+function resetA(){ H={x:330,y:110}; renderA(); }
+document.getElementById('resetA').onclick = resetA;
+document.getElementById('snapBtn').onclick = ()=>{
+  const r = Math.hypot(H.x-O.x,H.y-O.y);
+  H = {x:O.x, y:O.y-r};
+  renderA();
+};
+
+function renderA(){
+  svgA.innerHTML='';
+  const d2raw = {x:H.x-O.x, y:H.y-O.y};
+  const mag = Math.hypot(d2raw.x,d2raw.y)||1;
+  const d2 = {x:d2raw.x/mag, y:d2raw.y/mag};
+
+  svgA.appendChild(el('line',{x1:O.x-300,y1:O.y,x2:O.x+300,y2:O.y, stroke:'var(--sub)','stroke-width':2}));
+  svgA.appendChild(el('line',{x1:O.x-d2.x*300,y1:O.y-d2.y*300,x2:O.x+d2.x*300,y2:O.y+d2.y*300, stroke:'var(--accent)','stroke-width':2.5}));
+
+  const rays = [
+    {dir:{x:1,y:0}}, {dir:{x:-1,y:0}}, {dir:d2}, {dir:{x:-d2.x,y:-d2.y}}
+  ];
+  rays.forEach(r=> r.angle = Math.atan2(r.dir.y,r.dir.x));
+  rays.sort((a,b)=>a.angle-b.angle);
+  const sectors=[];
+  for(let i=0;i<4;i++){
+    const r1=rays[i], r2=rays[(i+1)%4];
+    let a1=r1.angle, a2=r2.angle;
+    if(a2<a1) a2+=Math.PI*2;
+    const sweep=(a2-a1)*180/Math.PI;
+    const bis=a1+(a2-a1)/2;
+    const pos={x:O.x+Math.cos(bis)*45, y:O.y+Math.sin(bis)*45};
+    sectors.push({angle:sweep,pos});
+  }
+  const colorOf=[COLORS[0],COLORS[1],COLORS[0],COLORS[1]];
+  sectors.forEach((s,i)=>{
+    const t=el('text',{x:s.pos.x,y:s.pos.y,'text-anchor':'middle','font-size':'13','font-weight':'800',fill:colorOf[i]});
+    t.textContent=s.angle.toFixed(0)+'°';
+    svgA.appendChild(t);
+  });
+
+  svgA.appendChild(el('circle',{cx:O.x,cy:O.y,r:4,fill:'var(--text)'}));
+  svgA.appendChild(el('circle',{cx:H.x,cy:H.y,r:11,fill:'var(--card)',stroke:'var(--accent)','stroke-width':3,style:'cursor:grab;'}));
+  const lab=el('text',{x:H.x,y:H.y-16,'text-anchor':'middle','font-size':'12','font-weight':'700',fill:'var(--sub)'});
+  lab.textContent='H';
+  svgA.appendChild(lab);
+
+  const rc=document.getElementById('resultA');
+  const opp1=sectors[0].angle, opp1b=sectors[2].angle;
+  const opp2=sectors[1].angle, opp2b=sectors[3].angle;
+  const adj1=sectors[0].angle, adj1b=sectors[1].angle;
+  rc.innerHTML = `
+    <div class="pairbox"><span class="swatch" style="background:${COLORS[0]}"></span>Bertentang Bucu 1: <span class="ok">${opp1.toFixed(1)}° = ${opp1b.toFixed(1)}° ✓</span></div>
+    <div class="pairbox"><span class="swatch" style="background:${COLORS[1]}"></span>Bertentang Bucu 2: <span class="ok">${opp2.toFixed(1)}° = ${opp2b.toFixed(1)}° ✓</span></div>
+    <div class="pairbox"><span class="swatch" style="background:var(--neutral)"></span>Bersebelahan: <span class="ok">${adj1.toFixed(1)}° + ${adj1b.toFixed(1)}° = ${(adj1+adj1b).toFixed(1)}°</span></div>
+  `;
+}
+
+function svgPointA(evt){
+  const rect=svgA.getBoundingClientRect();
+  const sx=400/rect.width, sy=400/rect.height;
+  return {x:(evt.clientX-rect.left)*sx, y:(evt.clientY-rect.top)*sy};
+}
+svgA.addEventListener('pointerdown',(e)=>{
+  const p=svgPointA(e);
+  if(Math.hypot(p.x-H.x,p.y-H.y)<30){ dragA=true; svgA.setPointerCapture(e.pointerId); }
+});
+svgA.addEventListener('pointermove',(e)=>{
+  if(!dragA) return;
+  const p=svgPointA(e);
+  if(Math.hypot(p.x-O.x,p.y-O.y) > 20) H = p;
+  renderA();
+});
+svgA.addEventListener('pointerup',()=>{dragA=false;});
+svgA.addEventListener('pointercancel',()=>{dragA=false;});
+
+/* ---------- PANEL B: Bahagi Sudut ---------- */
+const svgB = document.getElementById('planeB');
+const OB = {x:200,y:220};
+let targetSum = 180;
+let R = {x:350,y:60};
+let dragB=false;
+
+const promptsB = {
+  180: 'Dua sudut yang terbentuk di atas satu garis lurus SENTIASA berjumlah 180°.',
+  90: 'Dua sudut yang terbentuk di dalam satu sudut tegak (90°) SENTIASA berjumlah 90°.',
+  360: 'Dua sudut yang terbentuk dalam satu putaran lengkap di sekeliling satu titik SENTIASA berjumlah 360°.'
+};
+
+document.querySelectorAll('#panelB .mode').forEach(m=>{
+  m.onclick=()=>{
+    document.querySelectorAll('#panelB .mode').forEach(x=>x.classList.remove('active'));
+    m.classList.add('active');
+    targetSum = parseInt(m.dataset.sum);
+    resetB();
+  };
+});
+document.getElementById('resetB').onclick = resetB;
+
+function resetB(){
+  const halfAngle = (targetSum/2) * Math.PI/180;
+  R = {x: OB.x + Math.cos(-halfAngle)*140, y: OB.y + Math.sin(-halfAngle)*140};
+  renderB();
+}
+
+function renderB(){
+  svgB.innerHTML='';
+  const startAngle = -Math.PI/2 - (targetSum*Math.PI/180)/2;
+  const endAngle = startAngle + targetSum*Math.PI/180;
+  const startDir = {x:Math.cos(startAngle), y:Math.sin(startAngle)};
+  const endDir = {x:Math.cos(endAngle), y:Math.sin(endAngle)};
+
+  svgB.appendChild(el('line',{x1:OB.x, y1:OB.y, x2:OB.x+startDir.x*160, y2:OB.y+startDir.y*160, stroke:'var(--sub)','stroke-width':2.5}));
+  if(targetSum!==360){
+    svgB.appendChild(el('line',{x1:OB.x, y1:OB.y, x2:OB.x+endDir.x*160, y2:OB.y+endDir.y*160, stroke:'var(--sub)','stroke-width':2.5}));
+  } else {
+    svgB.appendChild(el('circle',{cx:OB.x,cy:OB.y,r:160,fill:'none',stroke:'var(--sub)','stroke-width':1.5,'stroke-dasharray':'4 4'}));
+  }
+
+  let ang = Math.atan2(R.y-OB.y, R.x-OB.x);
+  let rel = ang - startAngle;
+  while(rel < 0) rel += Math.PI*2;
+  while(rel > Math.PI*2) rel -= Math.PI*2;
+  const maxRel = targetSum*Math.PI/180;
+  if(rel > maxRel) rel = maxRel;
+  if(targetSum===360 && rel > maxRel-0.001) rel = maxRel-0.001;
+  const dividerAngle = startAngle + rel;
+  const dividerDir = {x:Math.cos(dividerAngle), y:Math.sin(dividerAngle)};
+  const Rclamped = {x:OB.x+dividerDir.x*140, y:OB.y+dividerDir.y*140};
+
+  svgB.appendChild(el('line',{x1:OB.x,y1:OB.y,x2:Rclamped.x,y2:Rclamped.y, stroke:'var(--accent)','stroke-width':2.5}));
+
+  const a1 = rel*180/Math.PI;
+  const a2 = targetSum - a1;
+
+  const bis1 = startAngle + rel/2;
+  const bis2 = dividerAngle + (maxRel-rel)/2;
+  const lab1pos = {x:OB.x+Math.cos(bis1)*60, y:OB.y+Math.sin(bis1)*60};
+  const lab2pos = {x:OB.x+Math.cos(bis2)*60, y:OB.y+Math.sin(bis2)*60};
+
+  const t1=el('text',{x:lab1pos.x,y:lab1pos.y,'text-anchor':'middle','font-size':'13','font-weight':'800',fill:COLORS[0]});
+  t1.textContent=a1.toFixed(0)+'°';
+  svgB.appendChild(t1);
+  const t2=el('text',{x:lab2pos.x,y:lab2pos.y,'text-anchor':'middle','font-size':'13','font-weight':'800',fill:COLORS[1]});
+  t2.textContent=a2.toFixed(0)+'°';
+  svgB.appendChild(t2);
+
+  svgB.appendChild(el('circle',{cx:OB.x,cy:OB.y,r:4,fill:'var(--text)'}));
+  svgB.appendChild(el('circle',{cx:Rclamped.x,cy:Rclamped.y,r:11,fill:'var(--card)',stroke:'var(--accent)','stroke-width':3,style:'cursor:grab;'}));
+  const lab=el('text',{x:Rclamped.x,y:Rclamped.y-16,'text-anchor':'middle','font-size':'12','font-weight':'700',fill:'var(--sub)'});
+  lab.textContent='R';
+  svgB.appendChild(lab);
+  R = Rclamped;
+
+  document.getElementById('resultB').innerHTML = `
+    <div class="pairbox"><span class="swatch" style="background:${COLORS[0]}"></span>Bahagian 1: <b>${a1.toFixed(1)}°</b></div>
+    <div class="pairbox"><span class="swatch" style="background:${COLORS[1]}"></span>Bahagian 2: <b>${a2.toFixed(1)}°</b></div>
+    <div class="pairbox"><span class="ok">Jumlah: ${(a1+a2).toFixed(1)}° = ${targetSum}° ✓</span></div>
+  `;
+  document.getElementById('promptB').textContent = promptsB[targetSum];
+}
+
+function svgPointB(evt){
+  const rect=svgB.getBoundingClientRect();
+  const sx=400/rect.width, sy=400/rect.height;
+  return {x:(evt.clientX-rect.left)*sx, y:(evt.clientY-rect.top)*sy};
+}
+svgB.addEventListener('pointerdown',(e)=>{
+  const p=svgPointB(e);
+  if(Math.hypot(p.x-R.x,p.y-R.y)<30){ dragB=true; svgB.setPointerCapture(e.pointerId); }
+});
+svgB.addEventListener('pointermove',(e)=>{
+  if(!dragB) return;
+  R = svgPointB(e);
+  renderB();
+});
+svgB.addEventListener('pointerup',()=>{dragB=false;});
+svgB.addEventListener('pointercancel',()=>{dragB=false;});
+
+renderA();
+resetB();
+</script>
+</body>
+</html>

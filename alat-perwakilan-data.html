@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Alat Perwakilan Data</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --border:#e5e7eb; --danger:#dc2626;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:560px; width:100%;}
+  h1{font-size:1.1rem; margin:0 0 10px; text-align:center;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px;}
+  h2{font-size:0.95rem; margin:0 0 10px; color:var(--accent); display:flex; align-items:center; gap:6px;}
+  .num{background:var(--accent); color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;}
+  label{font-size:0.83rem; font-weight:600; display:block; margin:8px 0 4px;}
+  input[type=text], input[type=number]{
+    width:100%; padding:10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:0.9rem;
+  }
+  button{cursor:pointer; font-weight:700; border:none; border-radius:10px;}
+  .secondary{background:var(--bg); color:var(--text); border:1px solid var(--border); padding:10px; font-size:0.85rem;}
+  .navrow{display:flex; gap:8px; margin-top:10px;}
+  .navrow button{flex:1;}
+  .charttypes{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;}
+  .ctbtn{padding:12px 6px; border-radius:10px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-size:0.78rem; text-align:center;}
+  .ctbtn.active{border-color:var(--accent); background:rgba(37,99,235,0.1); color:var(--accent); font-weight:800;}
+  .rowentry{display:flex; gap:6px; margin-bottom:6px; align-items:center;}
+  .rowentry input{flex:1;}
+  .delbtn{width:34px; height:38px; border-radius:8px; background:rgba(220,38,38,0.1); color:var(--danger); font-size:1rem; flex-shrink:0;}
+  table.freq{width:100%; border-collapse:collapse; font-size:0.82rem; margin-top:8px;}
+  table.freq th, table.freq td{border:1px solid var(--border); padding:6px; text-align:center;}
+  table.freq th{background:var(--bg);}
+  canvas{max-width:100%;}
+  .stemtable{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:8px;}
+  .stemtable td{border:1px solid var(--border); padding:6px;}
+  .stemtable td:first-child{font-weight:700; background:var(--bg); width:50px; text-align:center;}
+  .note{font-size:0.75rem; color:var(--sub); margin-top:6px;}
+  .switchrow{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);}
+  .switchbtn{padding:8px 12px; border-radius:8px; border:1px solid var(--accent); background:var(--bg); color:var(--accent); font-size:0.78rem;}
+  .switchbtn.active{background:var(--accent); color:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Alat Perwakilan Data</h1>
+
+  <!-- LANGKAH 1: PILIH PERWAKILAN -->
+  <div class="card">
+    <h2><span class="num">1</span> Pilih Jenis Perwakilan</h2>
+    <div class="charttypes" id="chartTypeButtons"></div>
+    <p class="note" id="chartTypeDesc"></p>
+  </div>
+
+  <!-- LANGKAH 2: ISI DATA -->
+  <div class="card">
+    <h2><span class="num">2</span> Isi Jadual Data</h2>
+    <p class="note" id="colHint"></p>
+    <p class="note" style="color:var(--accent);">ℹ️ Jadual di bawah SUDAH ada data contoh — anda cuma perlu timpa/betulkan. Jadual akan bertukar jika anda pilih jenis carta yang perlukan struktur berbeza (contoh: Carta Pai perlu 1 lajur, Graf Sebar perlu 2 lajur nombor) — ini normal, bukan ralat.</p>
+    <div id="dataEntryArea"></div>
+    <div class="navrow">
+      <button class="secondary" id="addRowBtn">+ Tambah Baris</button>
+      <button class="secondary" id="sampleDataBtn">↺ Reset ke Templat</button>
+    </div>
+    <p class="note">💡 Jadual di atas SUDAH terisi contoh — timpa/betulkan sahaja nilai dengan data sebenar anda.</p>
+  </div>
+
+  <!-- LANGKAH 3: JADUAL KEKERAPAN -->
+  <div class="card">
+    <h2><span class="num">3</span> Jadual Kekerapan (Auto)</h2>
+    <div id="freqTableArea"></div>
+  </div>
+
+  <!-- LANGKAH 4: CARTA -->
+  <div class="card">
+    <h2><span class="num">4</span> Perwakilan Data</h2>
+    <div id="chartArea"></div>
+    <div class="switchrow" id="switchRow"></div>
+    <p class="note">👆 Cuba tukar antara jenis di atas — data SAMA, carta akan berubah serta-merta!</p>
+  </div>
+</div>
+
+<script>
+const SHAPES = {
+  kategori: {cols:['Kategori'], sample:[{a:'Bola Sepak'},{a:'Badminton'},{a:'Bola Sepak'},{a:'Ping Pong'},{a:'Badminton'},{a:'Bola Sepak'},{a:'Badminton'},{a:'Bola Sepak'}]},
+  numerik: {cols:['Label','Nilai'], sample:[{a:'Isnin',b:'12'},{a:'Selasa',b:'15'},{a:'Rabu',b:'9'},{a:'Khamis',b:'18'},{a:'Jumaat',b:'20'}]},
+  pasangan: {cols:['Nilai X','Nilai Y'], sample:[{a:'2',b:'5'},{a:'3',b:'7'},{a:'4',b:'8'},{a:'5',b:'11'},{a:'6',b:'13'}]},
+  kumpulan: {cols:['Kumpulan','Kategori'], sample:[{a:'Tingkatan 1A',b:'Bola Sepak'},{a:'Tingkatan 1A',b:'Badminton'},{a:'Tingkatan 1A',b:'Bola Sepak'},{a:'Tingkatan 1B',b:'Badminton'},{a:'Tingkatan 1B',b:'Badminton'},{a:'Tingkatan 1B',b:'Bola Sepak'}]}
+};
+const CHARTS = [
+  {id:'pai', label:'Carta Pai', shape:'kategori', desc:'Tunjuk bahagian drpd keseluruhan (peratus).'},
+  {id:'garis', label:'Graf Garis', shape:'numerik', desc:'Tunjuk perubahan nilai ikut turutan/masa.'},
+  {id:'histogram', label:'Histogram', shape:'numerik', desc:'Kumpulkan nombor kepada selang. Sesuai data banyak.'},
+  {id:'plotTitik', label:'Plot Titik', shape:'numerik', desc:'Setiap data = satu titik. Sesuai data sedikit.'},
+  {id:'plotBatang', label:'Plot Batang-Daun', shape:'numerik', desc:'Pisah nombor kepada batang & daun, kekal nilai sebenar.'},
+  {id:'sebar', label:'Graf Sebar', shape:'pasangan', desc:'Setiap titik = satu pasangan (X,Y). Lihat perkaitan.'},
+  {id:'palangKelompok', label:'Palang Berkelompok', shape:'kumpulan', desc:'Bar bersebelahan — mudah banding antara kumpulan.'},
+  {id:'palangTindan', label:'Palang Bertindan', shape:'kumpulan', desc:'Bar bertindan — mudah lihat jumlah keseluruhan.'}
+];
+
+let currentChart = 'pai';
+let rowsByShape = {
+  kategori: SHAPES.kategori.sample.map(r=>({a:r.a, b:r.b||''})),
+  numerik: SHAPES.numerik.sample.map(r=>({a:r.a, b:r.b||''})),
+  pasangan: SHAPES.pasangan.sample.map(r=>({a:r.a, b:r.b||''})),
+  kumpulan: SHAPES.kumpulan.sample.map(r=>({a:r.a, b:r.b||''}))
+};
+let chartInstance = null;
+
+function currentShape(){ return CHARTS.find(c=>c.id===currentChart).shape; }
+function rows(){ return rowsByShape[currentShape()]; }
+
+function renderChartTypeButtons(){
+  const c=document.getElementById('chartTypeButtons');
+  c.innerHTML='';
+  CHARTS.forEach(opt=>{
+    const b=document.createElement('div');
+    b.className='ctbtn'+(opt.id===currentChart?' active':'');
+    b.textContent=opt.label;
+    b.onclick=()=>{ currentChart=opt.id; fullRender(); };
+    c.appendChild(b);
+  });
+  document.getElementById('chartTypeDesc').textContent = '💡 ' + CHARTS.find(c=>c.id===currentChart).desc;
+}
+
+function renderDataEntry(){
+  const cols = SHAPES[currentShape()].cols;
+  document.getElementById('colHint').textContent = 'Lajur: ' + cols.join(' & ');
+  const area = document.getElementById('dataEntryArea');
+  area.innerHTML='';
+  rows().forEach((r,i)=>{
+    const div=document.createElement('div');
+    div.className='rowentry';
+    const inpA=document.createElement('input');
+    inpA.type='text'; inpA.placeholder=cols[0]; inpA.value=r.a;
+    inpA.oninput=(e)=>{ r.a=e.target.value; renderFreqTable(); renderChart(); };
+    div.appendChild(inpA);
+    if(cols.length>1){
+      const inpB=document.createElement('input');
+      inpB.type='text'; inpB.placeholder=cols[1]; inpB.value=r.b;
+      inpB.oninput=(e)=>{ r.b=e.target.value; renderFreqTable(); renderChart(); };
+      div.appendChild(inpB);
+    }
+    const del=document.createElement('button');
+    del.className='delbtn'; del.textContent='×';
+    del.onclick=()=>{ rows().splice(i,1); if(rows().length===0) rows().push({a:'',b:''}); renderDataEntry(); renderFreqTable(); renderChart(); };
+    div.appendChild(del);
+    area.appendChild(div);
+  });
+}
+document.getElementById('addRowBtn').onclick=()=>{ rows().push({a:'',b:''}); renderDataEntry(); };
+document.getElementById('sampleDataBtn').onclick=()=>{
+  rowsByShape[currentShape()] = SHAPES[currentShape()].sample.map(r=>({a:r.a, b:r.b||''}));
+  renderDataEntry(); renderFreqTable(); renderChart();
+};
+
+function validRows(){ return rows().filter(r=> r.a.trim()!==''); }
+
+function renderFreqTable(){
+  const area = document.getElementById('freqTableArea');
+  const vr = validRows();
+  const shape = currentShape();
+  if(vr.length===0){ area.innerHTML='<p class="note">Masukkan data di atas untuk lihat jadual kekerapan.</p>'; return; }
+
+  if(shape==='kategori'){
+    const counts={};
+    vr.forEach(r=> counts[r.a]=(counts[r.a]||0)+1);
+    let h='<table class="freq"><tr><th>Kategori</th><th>Kekerapan</th></tr>';
+    Object.keys(counts).forEach(k=> h+=`<tr><td>${k}</td><td>${counts[k]}</td></tr>`);
+    area.innerHTML=h+'</table>';
+  } else if(shape==='numerik'){
+    let h='<table class="freq"><tr><th>Label</th><th>Nilai</th></tr>';
+    vr.forEach(r=> h+=`<tr><td>${r.a}</td><td>${r.b}</td></tr>`);
+    area.innerHTML=h+'</table>';
+  } else if(shape==='pasangan'){
+    let h='<table class="freq"><tr><th>X</th><th>Y</th></tr>';
+    vr.forEach(r=> h+=`<tr><td>${r.a}</td><td>${r.b}</td></tr>`);
+    area.innerHTML=h+'</table>';
+  } else if(shape==='kumpulan'){
+    const groups=[...new Set(vr.map(r=>r.a))];
+    const cats=[...new Set(vr.map(r=>r.b))];
+    let h='<table class="freq"><tr><th>Kumpulan</th>'+cats.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+    groups.forEach(g=>{
+      h+=`<tr><td>${g}</td>`+cats.map(c=> `<td>${vr.filter(r=>r.a===g&&r.b===c).length}</td>`).join('')+'</tr>';
+    });
+    area.innerHTML=h+'</table>';
+  }
+}
+
+function destroyChart(){ if(chartInstance){ chartInstance.destroy(); chartInstance=null; } }
+
+function renderChart(){
+  const area = document.getElementById('chartArea');
+  destroyChart();
+  area.innerHTML='';
+  const vr = validRows();
+  if(vr.length===0){ area.innerHTML='<p class="note">Tiada data. Sila isi jadual di atas.</p>'; renderSwitchRow(); return; }
+
+  if(currentChart==='pai'){
+    const counts={}; vr.forEach(r=>counts[r.a]=(counts[r.a]||0)+1);
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'pie', data:{labels:Object.keys(counts), datasets:[{data:Object.values(counts), backgroundColor:['#2563eb','#dc2626','#059669','#7c3aed','#d97706','#0891b2']}]}});
+  }
+  else if(currentChart==='garis'){
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'line', data:{labels:vr.map(r=>r.a), datasets:[{label:'Nilai', data:vr.map(r=>parseFloat(r.b)||0), borderColor:'#2563eb', backgroundColor:'#2563eb'}]}});
+  }
+  else if(currentChart==='histogram'){
+    const widthWrap = document.createElement('div');
+    widthWrap.innerHTML = '<label>Lebar Selang <span class="note">(cth: 5 = kumpulan 0-5,5-10...)</span></label><input type="number" id="binWidth" value="5" min="1">';
+    area.appendChild(widthWrap);
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    function draw(){
+      const w = parseFloat(document.getElementById('binWidth').value)||5;
+      const nums = vr.map(r=>parseFloat(r.b)).filter(n=>!isNaN(n));
+      if(nums.length===0) return;
+      const min=Math.floor(Math.min(...nums)/w)*w, max=Math.ceil(Math.max(...nums)/w)*w;
+      const bins=[]; const labels=[];
+      for(let b=min;b<max;b+=w){ bins.push(0); labels.push(b+'-'+(b+w)); }
+      nums.forEach(n=>{ let idx=Math.min(Math.floor((n-min)/w), bins.length-1); bins[idx]++; });
+      destroyChart();
+      chartInstance = new Chart(canvas, {type:'bar', data:{labels, datasets:[{label:'Kekerapan', data:bins, backgroundColor:'#2563eb', barPercentage:1, categoryPercentage:1}]}, options:{scales:{x:{grid:{offset:false}}}}});
+    }
+    document.getElementById('binWidth').oninput = draw;
+    draw();
+  }
+  else if(currentChart==='plotTitik'){
+    const nums = vr.map(r=>parseFloat(r.b)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+    const counts={}; nums.forEach(n=>counts[n]=(counts[n]||0)+1);
+    const canvas=document.createElement('canvas'); canvas.width=500; canvas.height=260;
+    area.appendChild(canvas);
+    const ctx=canvas.getContext('2d');
+    const min=Math.min(...nums), max=Math.max(...nums);
+    const range = max-min || 1;
+    const padding=40;
+    ctx.strokeStyle='#888888';
+    ctx.beginPath(); ctx.moveTo(padding,220); ctx.lineTo(canvas.width-20,220); ctx.stroke();
+    Object.keys(counts).forEach(val=>{
+      const x = padding + ((val-min)/range)*(canvas.width-padding-40);
+      ctx.fillStyle='#2563eb';
+      for(let i=0;i<counts[val];i++){
+        ctx.beginPath();
+        ctx.arc(x, 210-i*16, 6, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle='#1a1d29';
+      ctx.font='11px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(val, x, 234);
+    });
+  }
+  else if(currentChart==='plotBatang'){
+    const nums = vr.map(r=>parseInt(r.b)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+    const stems={};
+    nums.forEach(n=>{ const s=Math.floor(n/10); const l=n%10; if(!stems[s]) stems[s]=[]; stems[s].push(l); });
+    let h='<table class="stemtable"><tr><td>Batang</td><td>Daun</td></tr>';
+    Object.keys(stems).sort((a,b)=>a-b).forEach(s=>{
+      h += `<tr><td>${s}</td><td>${stems[s].sort((a,b)=>a-b).join(' ')}</td></tr>`;
+    });
+    h+='</table><p class="note">Kunci: Batang | Daun → cth Batang 3, Daun 4 = 34</p>';
+    area.innerHTML = h;
+  }
+  else if(currentChart==='sebar'){
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'scatter', data:{datasets:[{label:'Data', data:vr.map(r=>({x:parseFloat(r.a)||0,y:parseFloat(r.b)||0})), backgroundColor:'#2563eb'}]}});
+  }
+  else if(currentChart==='palangKelompok' || currentChart==='palangTindan'){
+    const groups=[...new Set(vr.map(r=>r.a))];
+    const cats=[...new Set(vr.map(r=>r.b))];
+    const colors=['#2563eb','#dc2626','#059669','#7c3aed','#d97706'];
+    const datasets = cats.map((c,i)=>({
+      label:c,
+      data: groups.map(g=> vr.filter(r=>r.a===g&&r.b===c).length),
+      backgroundColor: colors[i%colors.length],
+      stack: currentChart==='palangTindan' ? 'stack1' : undefined
+    }));
+    const canvas=document.createElement('canvas'); area.appendChild(canvas);
+    chartInstance = new Chart(canvas, {type:'bar', data:{labels:groups, datasets}, options:{scales: currentChart==='palangTindan' ? {x:{stacked:true},y:{stacked:true}} : {}}});
+  }
+  renderSwitchRow();
+}
+
+function renderSwitchRow(){
+  const shape = currentShape();
+  const row = document.getElementById('switchRow');
+  row.innerHTML='';
+  const sameShapeCharts = CHARTS.filter(c=>c.shape===shape);
+  if(sameShapeCharts.length<2){ row.innerHTML='<p class="note">(Tiada jenis lain guna struktur data yang sama)</p>'; return; }
+  sameShapeCharts.forEach(c=>{
+    const b=document.createElement('div');
+    b.className='switchbtn'+(c.id===currentChart?' active':'');
+    b.textContent=c.label;
+    b.onclick=()=>{ currentChart=c.id; renderChartTypeButtons(); renderChart(); };
+    row.appendChild(b);
+  });
+}
+
+function fullRender(){
+  renderChartTypeButtons();
+  renderDataEntry();
+  renderFreqTable();
+  renderChart();
+}
+
+fullRender();
+</script>
+</body>
+</html>

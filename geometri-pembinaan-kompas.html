@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pembinaan Kompas Dinamik</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --border:#e5e7eb; --neutral:#9ca3af; --danger:#dc2626;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:540px; width:100%;}
+  h1{font-size:1.1rem; margin:0 0 8px;}
+  select{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-weight:700; font-size:0.9rem; margin-bottom:10px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;}
+  svg{width:100%; height:auto; display:block; touch-action:none; background:var(--bg); border-radius:10px;}
+  .tools{display:flex; gap:6px; margin-bottom:10px;}
+  .toolbtn{flex:1; padding:10px; text-align:center; border-radius:10px; border:1px solid var(--border); background:var(--card); font-weight:700; font-size:0.85rem; cursor:pointer;}
+  .toolbtn.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .steps{font-size:0.83rem; line-height:1.5; color:var(--sub);}
+  .steps ol{margin:6px 0 0; padding-left:18px;}
+  .btnrow{display:flex; gap:6px; margin-top:8px;}
+  button.small{flex:1; padding:9px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; font-size:0.82rem; cursor:pointer;}
+  .status{padding:10px; border-radius:10px; font-weight:700; text-align:center; font-size:0.9rem; margin-bottom:10px;}
+  .status.wait{background:var(--bg); color:var(--sub);}
+  .status.ok{background:rgba(5,150,105,0.15); color:var(--accent2);}
+  .hint{font-size:0.78rem; color:var(--sub); text-align:center; margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧭 Pembinaan Kompas Dinamik</h1>
+
+  <select id="taskSelect">
+    <option value="bisector">1. Pembahagi Dua Sama Serenjang (Tembereng Garis)</option>
+    <option value="perp">2. Garis Serenjang kepada Garis Lurus</option>
+    <option value="ang60">3. Membina Sudut 60°</option>
+    <option value="bisectang">4. Pembahagi Dua Sama Sudut</option>
+  </select>
+
+  <div class="card">
+    <div class="status wait" id="statusBox">Ikut langkah untuk lengkapkan pembinaan.</div>
+    <div class="tools">
+      <div class="toolbtn active" id="toolCompass">🧭 Kompas</div>
+      <div class="toolbtn" id="toolRuler">📏 Pembaris</div>
+    </div>
+    <svg id="plane" viewBox="0 0 400 400"></svg>
+    <div class="hint" id="hintText"></div>
+    <div class="btnrow">
+      <button class="small" id="undoBtn">↩ Buang Terakhir</button>
+      <button class="small" id="resetBtn">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <b style="font-size:0.85rem;">Langkah Dicadangkan</b>
+    <div class="steps" id="stepsBox"></div>
+  </div>
+
+  <div class="foot" style="font-size:0.7rem;color:var(--sub);text-align:center;">Selaras SP 6.1.1, 6.1.2 (KP2027 Matematik Tingkatan 1)</div>
+</div>
+
+<script>
+const ns='http://www.w3.org/2000/svg';
+const svg=document.getElementById('plane');
+function el(tag,attrs){ const e=document.createElementNS(ns,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+
+let task='bisector';
+let tool='compass';
+let points=[]; // {x,y,id,fixed,label}
+let circles=[]; // {cx,cy,r}
+let lines=[]; // {x1,y1,x2,y2} stored as long segment across canvas
+let pendingCenter=null;
+let dragging=false;
+let dragCurrent=null;
+let pendingLineStart=null;
+
+const TASKS = {
+  bisector: {
+    label:'Pembahagi Dua Sama Serenjang',
+    setup(){
+      points=[{x:100,y:200,fixed:true,label:'A'},{x:300,y:200,fixed:true,label:'B'}];
+      circles=[]; lines=[];
+    },
+    steps:[
+      'Guna KOMPAS: letak pusat di A, lukis lengkok dengan jejari LEBIH BESAR daripada separuh AB.',
+      'Guna KOMPAS: letak pusat di B, jejari SAMA (akan snap automatik), lukis lengkok.',
+      'Perhatikan dua lengkok bersilang pada 2 titik (atas & bawah).',
+      'Guna PEMBARIS: sambung DUA titik persilangan tersebut.'
+    ],
+    validate(){
+      const A=points.find(p=>p.label==='A'), B=points.find(p=>p.label==='B');
+      for(const l of lines){
+        const M={x:(A.x+B.x)/2,y:(A.y+B.y)/2};
+        const distToM = pointLineDist(M,l);
+        const dirL = norm({x:l.x2-l.x1,y:l.y2-l.y1});
+        const dirAB = norm({x:B.x-A.x,y:B.y-A.y});
+        const perpDot = Math.abs(dirL.x*dirAB.x + dirL.y*dirAB.y);
+        if(distToM < 4 && perpDot < 0.03) return true;
+      }
+      return false;
+    }
+  },
+  perp: {
+    label:'Garis Serenjang kepada Garis Lurus',
+    setup(){
+      points=[{x:90,y:280,fixed:true,label:'P'},{x:320,y:280,fixed:true,label:'Q'},{x:220,y:110,fixed:true,label:'X'}];
+      circles=[]; lines=[];
+    },
+    steps:[
+      'Guna KOMPAS: letak pusat di X, lukis lengkok dengan jejari cukup besar untuk silang garis PQ pada 2 titik.',
+      'Guna KOMPAS: letak pusat pada SETIAP titik persilangan itu (jejari sama), lukis lengkok kecil di bawah garis PQ supaya kedua-duanya bersilang.',
+      'Guna PEMBARIS: sambung X ke titik persilangan lengkok kecil tadi.'
+    ],
+    validate(){
+      const P=points.find(p=>p.label==='P'), Q=points.find(p=>p.label==='Q'), X=points.find(p=>p.label==='X');
+      const dirPQ = norm({x:Q.x-P.x,y:Q.y-P.y});
+      for(const l of lines){
+        const distToX = pointLineDist(X,l);
+        if(distToX > 4) continue;
+        const dirL = norm({x:l.x2-l.x1,y:l.y2-l.y1});
+        const perpDot = Math.abs(dirL.x*dirPQ.x + dirL.y*dirPQ.y);
+        if(perpDot < 0.03) return true;
+      }
+      return false;
+    }
+  },
+  ang60: {
+    label:'Sudut 60°',
+    setup(){
+      points=[{x:120,y:300,fixed:true,label:'O'},{x:300,y:300,fixed:true,label:'M'}];
+      circles=[]; lines=[];
+    },
+    steps:[
+      'Guna KOMPAS: letak pusat di O, lukis lengkok dengan jejari sebarang, memotong OM di satu titik (namakan ia P).',
+      'Guna KOMPAS: letak pusat di P, jejari SAMA seperti tadi (snap automatik), lukis lengkok memotong lengkok pertama.',
+      'Guna PEMBARIS: sambung O ke titik persilangan dua lengkok tersebut. Sudut yang terbentuk ialah 60°.'
+    ],
+    validate(){
+      const O=points.find(p=>p.label==='O'), M=points.find(p=>p.label==='M');
+      const dirOM = norm({x:M.x-O.x,y:M.y-O.y});
+      for(const l of lines){
+        const distToO = pointLineDist(O,l);
+        if(distToO > 4) continue;
+        // direction of line away from O towards the far end
+        const far = dist(O,{x:l.x1,y:l.y1}) > dist(O,{x:l.x2,y:l.y2}) ? {x:l.x1,y:l.y1} : {x:l.x2,y:l.y2};
+        const dirL = norm({x:far.x-O.x,y:far.y-O.y});
+        const cosA = dirL.x*dirOM.x + dirL.y*dirOM.y;
+        const ang = Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI;
+        if(Math.abs(ang-60) < 3) return true;
+      }
+      return false;
+    }
+  },
+  bisectang: {
+    label:'Pembahagi Dua Sama Sudut',
+    setup(){
+      points=[{x:150,y:320,fixed:true,label:'O'},{x:320,y:320,fixed:true,label:'M'},{x:150,y:130,fixed:true,label:'N'}];
+      circles=[]; lines=[];
+    },
+    steps:[
+      'Guna KOMPAS: letak pusat di O, lukis lengkok memotong KEDUA-DUA lengan sudut (OM dan ON).',
+      'Guna KOMPAS: letak pusat pada setiap titik persilangan tadi (jejari sama), lukis lengkok supaya bersilang antara satu sama lain.',
+      'Guna PEMBARIS: sambung O ke titik persilangan itu. Ini ialah pembahagi dua sama sudut.'
+    ],
+    validate(){
+      const O=points.find(p=>p.label==='O'), M=points.find(p=>p.label==='M'), N=points.find(p=>p.label==='N');
+      const dirOM=norm({x:M.x-O.x,y:M.y-O.y});
+      const dirON=norm({x:N.x-O.x,y:N.y-O.y});
+      const fullAngle = Math.acos(Math.max(-1,Math.min(1,dirOM.x*dirON.x+dirOM.y*dirON.y)))*180/Math.PI;
+      for(const l of lines){
+        const distToO = pointLineDist(O,l);
+        if(distToO > 4) continue;
+        const far = dist(O,{x:l.x1,y:l.y1}) > dist(O,{x:l.x2,y:l.y2}) ? {x:l.x1,y:l.y1} : {x:l.x2,y:l.y2};
+        const dirL = norm({x:far.x-O.x,y:far.y-O.y});
+        const a1 = Math.acos(Math.max(-1,Math.min(1,dirL.x*dirOM.x+dirL.y*dirOM.y)))*180/Math.PI;
+        const a2 = Math.acos(Math.max(-1,Math.min(1,dirL.x*dirON.x+dirL.y*dirON.y)))*180/Math.PI;
+        if(Math.abs(a1-a2) < 3 && Math.abs((a1+a2)-fullAngle) < 4) return true;
+      }
+      return false;
+    }
+  }
+};
+
+function norm(v){ const m=Math.hypot(v.x,v.y)||1; return {x:v.x/m,y:v.y/m}; }
+function pointLineDist(p,l){
+  const dx=l.x2-l.x1, dy=l.y2-l.y1;
+  const len=Math.hypot(dx,dy)||1;
+  const t=((p.x-l.x1)*dx+(p.y-l.y1)*dy)/(len*len);
+  const projx=l.x1+t*dx, projy=l.y1+t*dy;
+  return Math.hypot(p.x-projx,p.y-projy);
+}
+
+function loadTask(t){
+  task=t;
+  TASKS[task].setup();
+  document.getElementById('stepsBox').innerHTML = '<ol>'+TASKS[task].steps.map(s=>`<li>${s}</li>`).join('')+'</ol>';
+  document.getElementById('statusBox').className='status wait';
+  document.getElementById('statusBox').textContent='Ikut langkah untuk lengkapkan pembinaan.';
+  pendingCenter=null; pendingLineStart=null; dragging=false;
+  render();
+}
+document.getElementById('taskSelect').onchange=(e)=>loadTask(e.target.value);
+
+document.getElementById('toolCompass').onclick=()=>{ tool='compass'; pendingLineStart=null; setTools(); };
+document.getElementById('toolRuler').onclick=()=>{ tool='ruler'; pendingCenter=null; setTools(); };
+function setTools(){
+  document.getElementById('toolCompass').classList.toggle('active', tool==='compass');
+  document.getElementById('toolRuler').classList.toggle('active', tool==='ruler');
+  document.getElementById('hintText').textContent = tool==='compass'
+    ? 'Klik titik pusat, seret untuk buka jejari, lepas untuk lukis lengkok.'
+    : 'Klik titik pertama, kemudian klik titik kedua untuk lukis garis.';
+}
+
+document.getElementById('undoBtn').onclick=()=>{
+  if(lines.length>0) lines.pop();
+  else if(circles.length>0) circles.pop();
+  render();
+};
+document.getElementById('resetBtn').onclick=()=> loadTask(task);
+
+// ---- geometry: intersections for snapping ----
+function circleCircleIntersect(c1,c2){
+  const d = Math.hypot(c2.cx-c1.cx, c2.cy-c1.cy);
+  if(d > c1.r+c2.r || d < Math.abs(c1.r-c2.r) || d===0) return [];
+  const a=(c1.r*c1.r - c2.r*c2.r + d*d)/(2*d);
+  const h2 = c1.r*c1.r - a*a;
+  if(h2<0) return [];
+  const h=Math.sqrt(h2);
+  const xm = c1.cx + a*(c2.cx-c1.cx)/d;
+  const ym = c1.cy + a*(c2.cy-c1.cy)/d;
+  const xs1 = xm + h*(c2.cy-c1.cy)/d, ys1 = ym - h*(c2.cx-c1.cx)/d;
+  const xs2 = xm - h*(c2.cy-c1.cy)/d, ys2 = ym + h*(c2.cx-c1.cx)/d;
+  return [{x:xs1,y:ys1},{x:xs2,y:ys2}];
+}
+function circleLineIntersect(c,l){
+  const dx=l.x2-l.x1, dy=l.y2-l.y1;
+  const fx=l.x1-c.cx, fy=l.y1-c.cy;
+  const a=dx*dx+dy*dy, b=2*(fx*dx+fy*dy), cc=fx*fx+fy*fy-c.r*c.r;
+  let disc=b*b-4*a*cc;
+  if(disc<0) return [];
+  disc=Math.sqrt(disc);
+  const t1=(-b-disc)/(2*a), t2=(-b+disc)/(2*a);
+  const pts=[];
+  [t1,t2].forEach(t=>pts.push({x:l.x1+t*dx,y:l.y1+t*dy}));
+  return pts;
+}
+function lineLineIntersect(l1,l2){
+  const d1x=l1.x2-l1.x1, d1y=l1.y2-l1.y1;
+  const d2x=l2.x2-l2.x1, d2y=l2.y2-l2.y1;
+  const denom = d1x*d2y - d1y*d2x;
+  if(Math.abs(denom)<1e-9) return [];
+  const t = ((l2.x1-l1.x1)*d2y - (l2.y1-l1.y1)*d2x)/denom;
+  return [{x:l1.x1+t*d1x, y:l1.y1+t*d1y}];
+}
+function allCandidatePoints(){
+  const cands=[...points];
+  for(let i=0;i<circles.length;i++){
+    for(let j=i+1;j<circles.length;j++) cands.push(...circleCircleIntersect(circles[i],circles[j]));
+    for(const l of lines) cands.push(...circleLineIntersect(circles[i],l));
+  }
+  for(let i=0;i<lines.length;i++) for(let j=i+1;j<lines.length;j++) cands.push(...lineLineIntersect(lines[i],lines[j]));
+  return cands;
+}
+function candidateRadii(center){
+  const r=[];
+  circles.forEach(c=>r.push(c.r));
+  allCandidatePoints().forEach(p=>{ if(dist(p,center)>3) r.push(dist(p,center)); });
+  return r;
+}
+function snapPoint(p){
+  const cands = allCandidatePoints();
+  let best=null, bestD=16;
+  cands.forEach(c=>{ const d=dist(c,p); if(d<bestD){ bestD=d; best=c; } });
+  return best;
+}
+
+function extendLine(p1,p2){
+  const dir=norm({x:p2.x-p1.x,y:p2.y-p1.y});
+  return { x1:p1.x-dir.x*500, y1:p1.y-dir.y*500, x2:p1.x+dir.x*500, y2:p1.y+dir.y*500 };
+}
+
+function render(){
+  svg.innerHTML='';
+  circles.forEach(c=> svg.appendChild(el('circle',{cx:c.cx,cy:c.cy,r:c.r,fill:'none',stroke:'var(--accent)','stroke-width':1.5,'stroke-dasharray':'3 3'})));
+  lines.forEach(l=> svg.appendChild(el('line',{x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2,stroke:'var(--danger)','stroke-width':2.5})));
+  if(dragging && pendingCenter && dragCurrent){
+    let r = dist(pendingCenter, dragCurrent);
+    const snaps = candidateRadii(pendingCenter);
+    for(const sr of snaps){ if(Math.abs(sr-r) < 8){ r=sr; break; } }
+    svg.appendChild(el('circle',{cx:pendingCenter.x,cy:pendingCenter.y,r:r,fill:'none',stroke:'var(--accent2)','stroke-width':2}));
+  }
+  if(pendingLineStart){
+    svg.appendChild(el('circle',{cx:pendingLineStart.x,cy:pendingLineStart.y,r:6,fill:'var(--danger)'}));
+  }
+  points.forEach(p=>{
+    svg.appendChild(el('circle',{cx:p.x,cy:p.y,r:5,fill:'var(--text)'}));
+    const t=el('text',{x:p.x+10,y:p.y-8,'font-size':'13','font-weight':'700',fill:'var(--text)'});
+    t.textContent=p.label;
+    svg.appendChild(t);
+  });
+}
+
+function svgPoint(evt){
+  const rect=svg.getBoundingClientRect();
+  const sx=400/rect.width, sy=400/rect.height;
+  return {x:(evt.clientX-rect.left)*sx, y:(evt.clientY-rect.top)*sy};
+}
+
+svg.addEventListener('pointerdown',(e)=>{
+  const p=svgPoint(e);
+  if(tool==='compass'){
+    const snapped = snapPoint(p) || p;
+    pendingCenter = snapped;
+    dragCurrent = p;
+    dragging=true;
+    svg.setPointerCapture(e.pointerId);
+    render();
+  } else {
+    const snapped = snapPoint(p);
+    if(!snapped){ document.getElementById('hintText').textContent='Klik lebih dekat pada titik/persilangan sedia ada.'; return; }
+    if(!pendingLineStart){
+      pendingLineStart = snapped;
+      render();
+    } else {
+      if(dist(pendingLineStart,snapped) > 3){
+        lines.push(extendLine(pendingLineStart, snapped));
+        checkValidation();
+      }
+      pendingLineStart=null;
+      render();
+    }
+  }
+});
+svg.addEventListener('pointermove',(e)=>{
+  if(dragging){ dragCurrent = svgPoint(e); render(); }
+});
+svg.addEventListener('pointerup',()=>{
+  if(dragging && pendingCenter && dragCurrent){
+    let r = dist(pendingCenter, dragCurrent);
+    if(r > 8){
+      const snaps = candidateRadii(pendingCenter);
+      for(const sr of snaps){ if(Math.abs(sr-r) < 8){ r=sr; break; } }
+      circles.push({cx:pendingCenter.x, cy:pendingCenter.y, r});
+    }
+  }
+  dragging=false; pendingCenter=null;
+  render();
+});
+svg.addEventListener('pointercancel',()=>{ dragging=false; pendingCenter=null; render(); });
+
+function checkValidation(){
+  if(TASKS[task].validate()){
+    const sb=document.getElementById('statusBox');
+    sb.className='status ok';
+    sb.textContent='✓ Pembinaan Betul! Syabas.';
+  }
+}
+
+loadTask('bisector');
+setTools();
+</script>
+</body>
+</html>

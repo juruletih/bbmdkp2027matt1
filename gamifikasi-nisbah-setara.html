@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Permainan Nisbah Setara</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1a1d29; --sub:#5a5f73;
+    --accent:#2563eb; --accent2:#059669; --danger:#dc2626; --border:#e5e7eb;
+    --gold:#d97706;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  }
+  :root[data-theme="dark"]{ --bg:#12141c; --card:#1b1e2a; --text:#eef0f6; --sub:#a3a8bf; --border:#2c3040; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:14px; display:flex; justify-content:center;}
+  .wrap{max-width:540px; width:100%;}
+  h1{font-size:1.15rem; margin:0 0 2px; text-align:center;}
+  p.sub{color:var(--sub); margin:0 0 12px; font-size:0.85rem; text-align:center;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px;}
+  h2{font-size:1rem; margin:0 0 8px;}
+  h3{font-size:0.9rem; margin:12px 0 4px; color:var(--accent);}
+  p, li{font-size:0.87rem; line-height:1.5;}
+  .example{background:var(--bg); border-radius:10px; padding:10px; margin:8px 0; font-size:0.85rem;}
+  svg.barvis{width:100%; height:auto; display:block; margin:6px 0;}
+  button.primary{width:100%; padding:12px; border-radius:12px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:0.95rem; cursor:pointer; margin-top:8px;}
+  button.secondary{width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; font-size:0.87rem; cursor:pointer; margin-top:8px;}
+  .levelcard{display:flex; align-items:center; justify-content:space-between; padding:14px; border-radius:12px; border:1px solid var(--border); margin-bottom:10px; cursor:pointer;}
+  .levelcard.locked{opacity:0.5; cursor:not-allowed;}
+  .levelcard .title{font-weight:700; font-size:0.95rem;}
+  .levelcard .desc{font-size:0.78rem; color:var(--sub);}
+  .stars{font-size:1.1rem; color:var(--gold);}
+  .progressbar{height:8px; background:var(--bg); border-radius:5px; overflow:hidden; margin-bottom:14px;}
+  .progressfill{height:100%; background:var(--accent); transition:width 0.3s;}
+  .qtext{font-size:1rem; font-weight:700; margin-bottom:14px; text-align:center;}
+  .opt{display:block; width:100%; padding:12px; margin-bottom:8px; border-radius:10px; border:2px solid var(--border); background:var(--card); color:var(--text); font-weight:600; font-size:0.9rem; cursor:pointer; text-align:left;}
+  .opt.correct{border-color:var(--accent2); background:rgba(5,150,105,0.12); color:var(--accent2);}
+  .opt.wrong{border-color:var(--danger); background:rgba(220,38,38,0.12); color:var(--danger);}
+  .opt:disabled{cursor:default;}
+  .fillrow{display:flex; gap:8px; align-items:center; justify-content:center; margin-bottom:14px;}
+  .fillrow input{width:80px; padding:10px; border-radius:10px; border:2px solid var(--border); background:var(--card); color:var(--text); font-size:1rem; text-align:center; font-weight:700;}
+  .feedback{padding:10px; border-radius:10px; font-size:0.85rem; margin-bottom:10px; font-weight:600;}
+  .feedback.ok{background:rgba(5,150,105,0.12); color:var(--accent2);}
+  .feedback.bad{background:rgba(220,38,38,0.12); color:var(--danger);}
+  .scorebox{text-align:center; padding:16px;}
+  .scorebox .big{font-size:2rem; font-weight:800; color:var(--accent);}
+  .topbar{display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:var(--sub); margin-bottom:8px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎮 Permainan Nisbah Setara</h1>
+  <p class="sub">SP 3.1.2 — Menentukan nisbah setara dan mengungkapkannya dalam bentuk termudah</p>
+
+  <!-- NOTA SCREEN -->
+  <div id="screenNotes">
+    <div class="card">
+      <h2>📖 Apa itu Nisbah Setara?</h2>
+      <p><b>Nisbah setara</b> ialah nisbah yang mewakili perbandingan yang SAMA walaupun nombornya berbeza — sama macam pecahan setara.</p>
+      <div class="example">
+        <b>Contoh:</b> 2 : 3 setara dengan 4 : 6, 6 : 9, 8 : 12...
+        <svg class="barvis" viewBox="0 0 300 90">
+          <rect x="10" y="10" width="40" height="20" fill="#2563eb"/><rect x="52" y="10" width="60" height="20" fill="#059669"/>
+          <text x="10" y="45" font-size="11" fill="var(--sub)">2 : 3</text>
+          <rect x="10" y="55" width="80" height="20" fill="#2563eb"/><rect x="92" y="55" width="120" height="20" fill="#059669"/>
+          <text x="10" y="90" font-size="11" fill="var(--sub)">4 : 6 (×2)</text>
+        </svg>
+      </div>
+
+      <h3>Kaedah 1: Cari Nisbah Setara</h3>
+      <p>Darab (atau bahagi) KEDUA-DUA bahagian nisbah dengan nombor yang SAMA.</p>
+      <div class="example">3 : 5 → (×2) → 6 : 10 → (×3) → 18 : 30</div>
+
+      <h3>Kaedah 2: Permudahkan Nisbah</h3>
+      <p>Bahagikan kedua-dua bahagian dengan Faktor Sepunya Terbesar (FSTB).</p>
+      <div class="example">12 : 18 → FSTB = 6 → (÷6) → 2 : 3</div>
+
+      <h3>Nisbah Melibatkan Pecahan, Perpuluhan, Peratusan</h3>
+      <p>Tukar dahulu kepada nombor bulat sebelum permudahkan:</p>
+      <div class="example">
+        <b>Perpuluhan:</b> 0.4 : 0.6 → (×10) → 4 : 6 → (÷2) → 2 : 3<br><br>
+        <b>Pecahan:</b> ½ : ⅓ → (×6) → 3 : 2<br><br>
+        <b>Peratusan:</b> 40% : 60% → (buang %) → 40 : 60 → (÷20) → 2 : 3
+      </div>
+
+      <h3>Nisbah Tiga Kuantiti</h3>
+      <p>Prinsip sama — kena darab/bahagi SEMUA tiga bahagian dengan nombor sama.</p>
+      <div class="example">6 : 9 : 12 → FSTB = 3 → (÷3) → 2 : 3 : 4</div>
+    </div>
+    <button class="primary" id="startGameBtn">🎮 Mula Bermain!</button>
+  </div>
+
+  <!-- LEVEL MENU -->
+  <div id="screenMenu" class="hidden">
+    <div class="card">
+      <h2>Pilih Tahap</h2>
+      <div id="levelList"></div>
+    </div>
+    <button class="secondary" id="backToNotesBtn">📖 Baca Nota Semula</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screenQuiz" class="hidden">
+    <div class="card">
+      <div class="topbar">
+        <span id="quizLevelName"></span>
+        <span id="quizProgress"></span>
+      </div>
+      <div class="progressbar"><div class="progressfill" id="progressFill" style="width:0%"></div></div>
+      <div class="qtext" id="qText"></div>
+      <div id="qBody"></div>
+      <div id="feedbackBox"></div>
+      <button class="primary hidden" id="nextBtn">Soalan Seterusnya →</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="screenResult" class="hidden">
+    <div class="card scorebox">
+      <div id="resultStars" style="font-size:2rem;"></div>
+      <div class="big" id="resultScore"></div>
+      <p id="resultMsg"></p>
+    </div>
+    <button class="primary" id="retryBtn">↺ Cuba Lagi</button>
+    <button class="secondary" id="menuBtn">📋 Kembali ke Menu Tahap</button>
+  </div>
+</div>
+
+<script>
+const LEVELS = [
+  { id:0, name:'Tahap 1: Asas', desc:'Nisbah nombor bulat', questions:[
+    {type:'mcq', q:'Nisbah manakah SETARA dengan 2 : 3?', opts:['4 : 6','3 : 5','5 : 6','2 : 5'], correct:0, explain:'2:3 didarab 2 = 4:6'},
+    {type:'mcq', q:'Permudahkan nisbah 10 : 15.', opts:['2 : 3','1 : 2','3 : 2','5 : 7'], correct:0, explain:'10:15 dibahagi FSTB(5) = 2:3'},
+    {type:'fill', q:'Lengkapkan: 4 : 7 = 12 : ___', answer:21, explain:'4×3=12, jadi 7×3=21'},
+    {type:'mcq', q:'Nisbah manakah TIDAK setara dengan 3 : 4?', opts:['6 : 8','9 : 12','12 : 16','5 : 6'], correct:3, explain:'5:6 bukan gandaan 3:4; yang lain semua ×2, ×3, ×4 daripada 3:4'},
+    {type:'mcq', q:'Permudahkan nisbah 18 : 24.', opts:['3 : 4','2 : 3','4 : 3','6 : 8'], correct:0, explain:'18:24 dibahagi FSTB(6) = 3:4'}
+  ]},
+  { id:1, name:'Tahap 2: Sederhana', desc:'Pecahan, perpuluhan, peratusan', questions:[
+    {type:'mcq', q:'Permudahkan nisbah 0.4 : 0.6 kepada nombor bulat termudah.', opts:['2 : 3','4 : 6','3 : 2','1 : 2'], correct:0, explain:'×10 → 4:6, ÷2 → 2:3'},
+    {type:'mcq', q:'Tukar nisbah ½ : ¼ kepada bentuk nombor bulat termudah.', opts:['2 : 1','1 : 2','4 : 2','3 : 1'], correct:0, explain:'×4 → 2:1'},
+    {type:'mcq', q:'Nisbah 50% : 75% setara dengan...', opts:['2 : 3','3 : 4','1 : 2','4 : 5'], correct:0, explain:'50:75 ÷25 = 2:3'},
+    {type:'fill', q:'Lengkapkan: 0.3 : 0.5 = 3 : ___', answer:5, explain:'×10 kedua-dua bahagian: 3:5'},
+    {type:'mcq', q:'Nisbah manakah setara dengan ¾ : ½?', opts:['3 : 2','2 : 3','1 : 2','4 : 3'], correct:0, explain:'×4 → 3:2'}
+  ]},
+  { id:2, name:'Tahap 3: Tinggi (KBAT)', desc:'Gabungan bentuk + 3 kuantiti', questions:[
+    {type:'mcq', q:'Permudahkan nisbah 6 : 9 : 12.', opts:['2 : 3 : 4','3 : 4 : 5','1 : 2 : 3','4 : 3 : 2'], correct:0, explain:'÷3 (FSTB) → 2:3:4'},
+    {type:'fill', q:'Lengkapkan: 2 : 3 : 5 = 8 : ___ : 20', answer:12, explain:'Faktor skala = 4 (2×4=8), jadi 3×4=12'},
+    {type:'mcq', q:'Nisbah ½ : ⅓ : ⅙ setara dengan (bentuk termudah)...', opts:['3 : 2 : 1','1 : 2 : 3','2 : 1 : 3','6 : 3 : 2'], correct:0, explain:'×6 semua → 3:2:1'},
+    {type:'mcq', q:'Nisbah 20% : 30% : 50% setara dengan...', opts:['2 : 3 : 5','3 : 2 : 5','5 : 3 : 2','2 : 5 : 3'], correct:0, explain:'20:30:50 ÷10 = 2:3:5'},
+    {type:'mcq', q:'Permudahkan nisbah 0.2 : 0.5 : 0.3.', opts:['2 : 5 : 3','5 : 2 : 3','3 : 5 : 2','2 : 3 : 5'], correct:0, explain:'×10 → 2:5:3'}
+  ]}
+];
+
+let progress = [0,0,0]; // best score per level (0-5)
+let currentLevel = 0;
+let currentQ = 0;
+let currentScore = 0;
+let answered = false;
+
+function show(id){
+  ['screenNotes','screenMenu','screenQuiz','screenResult'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s!==id);
+  });
+}
+
+document.getElementById('startGameBtn').onclick = ()=>{ renderMenu(); show('screenMenu'); };
+document.getElementById('backToNotesBtn').onclick = ()=> show('screenNotes');
+document.getElementById('menuBtn').onclick = ()=>{ renderMenu(); show('screenMenu'); };
+
+function renderMenu(){
+  const list = document.getElementById('levelList');
+  list.innerHTML = '';
+  LEVELS.forEach((lvl,i)=>{
+    const locked = i>0 && progress[i-1] < 3;
+    const div = document.createElement('div');
+    div.className = 'levelcard' + (locked?' locked':'');
+    const starsCount = progress[i] >=5 ? 3 : progress[i]>=4 ? 2 : progress[i]>=3 ? 1 : 0;
+    div.innerHTML = `<div><div class="title">${locked?'🔒 ':''}${lvl.name}</div><div class="desc">${lvl.desc}</div></div><div class="stars">${'★'.repeat(starsCount)}${'☆'.repeat(3-starsCount)}</div>`;
+    if(!locked){
+      div.onclick = ()=> startLevel(i);
+    }
+    list.appendChild(div);
+  });
+}
+
+function startLevel(i){
+  currentLevel = i;
+  currentQ = 0;
+  currentScore = 0;
+  show('screenQuiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  const lvl = LEVELS[currentLevel];
+  const q = lvl.questions[currentQ];
+  document.getElementById('quizLevelName').textContent = lvl.name;
+  document.getElementById('quizProgress').textContent = `Soalan ${currentQ+1} / ${lvl.questions.length}`;
+  document.getElementById('progressFill').style.width = ((currentQ)/lvl.questions.length*100)+'%';
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('feedbackBox').innerHTML = '';
+  document.getElementById('nextBtn').classList.add('hidden');
+
+  const body = document.getElementById('qBody');
+  body.innerHTML = '';
+  if(q.type==='mcq'){
+    q.opts.forEach((opt,idx)=>{
+      const btn = document.createElement('button');
+      btn.className='opt';
+      btn.textContent = opt;
+      btn.onclick = ()=> answerMcq(idx);
+      body.appendChild(btn);
+    });
+  } else if(q.type==='fill'){
+    body.innerHTML = `<div class="fillrow"><input type="number" id="fillInput" placeholder="?"><button class="primary" style="width:auto;padding:10px 16px;" id="submitFill">Jawab</button></div>`;
+    document.getElementById('submitFill').onclick = answerFill;
+  }
+}
+
+function answerMcq(idx){
+  if(answered) return;
+  answered = true;
+  const q = LEVELS[currentLevel].questions[currentQ];
+  const opts = document.querySelectorAll('#qBody .opt');
+  opts.forEach((b,i)=>{
+    b.disabled = true;
+    if(i===q.correct) b.classList.add('correct');
+    else if(i===idx) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedbackBox');
+  if(idx===q.correct){
+    currentScore++;
+    fb.innerHTML = `<div class="feedback ok">✓ Betul! ${q.explain}</div>`;
+  } else {
+    fb.innerHTML = `<div class="feedback bad">✗ Kurang tepat. ${q.explain}</div>`;
+  }
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function answerFill(){
+  if(answered) return;
+  const q = LEVELS[currentLevel].questions[currentQ];
+  const val = parseFloat(document.getElementById('fillInput').value);
+  answered = true;
+  document.getElementById('submitFill').disabled = true;
+  document.getElementById('fillInput').disabled = true;
+  const fb = document.getElementById('feedbackBox');
+  if(val === q.answer){
+    currentScore++;
+    fb.innerHTML = `<div class="feedback ok">✓ Betul! ${q.explain}</div>`;
+  } else {
+    fb.innerHTML = `<div class="feedback bad">✗ Jawapan sebenar: ${q.answer}. ${q.explain}</div>`;
+  }
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+document.getElementById('nextBtn').onclick = ()=>{
+  currentQ++;
+  const lvl = LEVELS[currentLevel];
+  if(currentQ >= lvl.questions.length){
+    finishLevel();
+  } else {
+    renderQuestion();
+  }
+};
+
+function finishLevel(){
+  document.getElementById('progressFill').style.width='100%';
+  progress[currentLevel] = Math.max(progress[currentLevel], currentScore);
+  const starsCount = currentScore>=5?3:currentScore>=4?2:currentScore>=3?1:0;
+  document.getElementById('resultStars').textContent = '★'.repeat(starsCount)+'☆'.repeat(3-starsCount);
+  document.getElementById('resultScore').textContent = `${currentScore} / ${LEVELS[currentLevel].questions.length}`;
+  let msg = '';
+  if(currentScore>=3){
+    msg = currentLevel < LEVELS.length-1 ? 'Syabas! Tahap seterusnya telah dibuka.' : 'Syabas! Anda telah kuasai nisbah setara sepenuhnya!';
+  } else {
+    msg = 'Cuba lagi! Baca semula nota jika perlu, anda pasti boleh.';
+  }
+  document.getElementById('resultMsg').textContent = msg;
+  show('screenResult');
+}
+
+document.getElementById('retryBtn').onclick = ()=> startLevel(currentLevel);
+
+show('screenNotes');
+</script>
+</body>
+</html>
