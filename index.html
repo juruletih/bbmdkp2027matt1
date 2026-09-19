@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bbmdkp2027matt1 — Bahan Berkongsi Matematik Tingkatan 1</title>
+<meta name="description" content="Bank alat interaktif dan bahan rujukan pedagogi untuk Matematik Tingkatan 1, Kurikulum Persekolahan 2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Newsreader:ital,opsz,wght@1,6..72,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+  :root{
+    --ink:        #1c2b45;
+    --ink-soft:   #445070;
+    --paper:      #f4f1e8;
+    --paper-line: #dcd6c4;
+    --panel:      #fbfaf5;
+    --gold:       #a9791f;
+    --gold-deep:  #7c5714;
+    --teal:       #35604a;
+    --rule:       #c9c2ab;
+    --max: 940px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#ece7d8; --ink-soft:#b9c0d4; --paper:#14181f; --paper-line:#2a2e37;
+      --panel:#1a1e26; --gold:#d1a24a; --gold-deep:#e7bd6c; --teal:#7fae93; --rule:#333844;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#ece7d8; --ink-soft:#b9c0d4; --paper:#14181f; --paper-line:#2a2e37;
+    --panel:#1a1e26; --gold:#d1a24a; --gold-deep:#e7bd6c; --teal:#7fae93; --rule:#333844;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--paper); color: var(--ink);
+    font-family: "Public Sans", -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  body::before{
+    content:""; position: fixed; inset:0; pointer-events:none;
+    background-image: repeating-linear-gradient(to bottom, transparent, transparent 35px, var(--paper-line) 35px, var(--paper-line) 36px);
+    opacity:.35; z-index:0;
+  }
+  a{ color: inherit; }
+  .wrap{ max-width: var(--max); margin: 0 auto; padding: 0 24px; position: relative; z-index:1; }
+
+  header.hero{ padding: 64px 0 40px; border-bottom: 1px solid var(--rule); }
+  .kicker{ font-family:"IBM Plex Mono",monospace; font-size:.78rem; color: var(--gold-deep); display:flex; align-items:center; gap:10px; }
+  h1{ font-family:"Newsreader",Georgia,serif; font-weight:500; font-size:clamp(2.1rem,5vw,3.1rem); line-height:1.08; margin:18px 0 14px; max-width:14ch; }
+  .lede{ font-size:1.08rem; color:var(--ink-soft); max-width:58ch; margin:0 0 28px; }
+  .hierarchy{ display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center; font-size:.92rem; color:var(--ink-soft); }
+  .hierarchy .seg{ padding:3px 10px; border:1px solid var(--rule); border-radius:3px; background:var(--panel); }
+  .hierarchy .arrow{ color:var(--rule); }
+
+  nav.jump{ display:flex; gap:22px; flex-wrap:wrap; padding:18px 0 0; font-size:.95rem; }
+  nav.jump a{ text-decoration:none; color:var(--ink-soft); border-bottom:1px solid transparent; padding-bottom:2px; }
+  nav.jump a:hover, nav.jump a:focus-visible{ color:var(--ink); border-color:var(--gold); }
+
+  section.block{ padding:52px 0; border-bottom:1px solid var(--rule); }
+  section.block:last-of-type{ border-bottom:none; }
+  .block-head{ display:flex; justify-content:space-between; align-items:baseline; gap:20px; margin-bottom:10px; }
+  .block-head h2{ font-family:"Newsreader",Georgia,serif; font-weight:500; font-size:1.7rem; margin:0; }
+  .block-head .tally{ font-family:"IBM Plex Mono",monospace; font-size:.82rem; color:var(--ink-soft); white-space:nowrap; }
+  .block-note{ color:var(--ink-soft); font-size:.97rem; max-width:62ch; margin:0 0 30px; }
+
+  .folder{ margin-bottom:14px; }
+  .folder-head{ display:flex; align-items:baseline; gap:12px; border-bottom:1px solid var(--paper-line); padding-bottom:8px; margin-bottom:4px; }
+  .folder-name{ font-family:"IBM Plex Mono",monospace; font-size:.85rem; color:var(--teal); }
+  .folder-desc{ font-size:.88rem; color:var(--ink-soft); }
+  ul.filelist{ list-style:none; margin:0; padding:0; }
+  ul.filelist li{ display:flex; align-items:baseline; gap:14px; padding:11px 2px; border-bottom:1px dashed var(--paper-line); flex-wrap:wrap; }
+  ul.filelist li:last-child{ border-bottom:none; }
+  ul.filelist a.file{ text-decoration:none; font-weight:600; color:var(--ink); flex:0 0 auto; }
+  ul.filelist a.file:hover, ul.filelist a.file:focus-visible{ color:var(--gold-deep); }
+  ul.filelist .filedesc{ color:var(--ink-soft); font-size:.92rem; }
+  .btnrow{ margin-left:auto; display:flex; gap:8px; flex:none; }
+  .btn{ font-family:"IBM Plex Mono",monospace; font-size:.72rem; border-radius:3px; padding:3px 9px; cursor:pointer; text-decoration:none; border:1px solid var(--gold); color:var(--gold-deep); background:transparent; }
+  .btn:hover{ background: var(--gold); color: var(--panel); }
+  .btn.ghost{ border-color:var(--rule); color:var(--ink-soft); }
+  .btn.ghost:hover{ background:var(--rule); color:var(--ink); }
+
+  .contribute{
+    margin-top:14px; margin-bottom:30px;
+    display:flex; gap:14px; align-items:flex-start;
+    border:1px solid var(--gold); border-left-width:4px; border-radius:3px;
+    padding:14px 16px; background: var(--panel);
+  }
+  .contribute svg{ flex:none; margin-top:2px; color:var(--gold-deep); }
+  .contribute p{ margin:0 0 8px; font-size:.92rem; color:var(--ink-soft); }
+  .contribute p b{ color:var(--ink); }
+  .contribute .links{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  ol.kb{ list-style:none; margin:0; padding:0; counter-reset:kb; }
+  ol.kb li{ counter-increment:kb; display:grid; grid-template-columns:44px 1fr; gap:4px 16px; padding:14px 0; border-bottom:1px dashed var(--paper-line); }
+  ol.kb li:last-child{ border-bottom:none; }
+  ol.kb li::before{ content: counter(kb, decimal-leading-zero); font-family:"IBM Plex Mono",monospace; color:var(--gold-deep); font-size:.95rem; padding-top:2px; }
+  .kbrow{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  ol.kb button.kbtitle{ font:inherit; background:none; border:none; padding:0; cursor:pointer; text-decoration:none; font-weight:600; color:var(--ink); font-size:1rem; }
+  ol.kb button.kbtitle:hover, ol.kb button.kbtitle:focus-visible{ color:var(--gold-deep); }
+  ol.kb .kbdesc{ grid-column:2; color:var(--ink-soft); font-size:.92rem; }
+
+  .anchor-note{ background:var(--panel); border:1px solid var(--rule); border-radius:4px; padding:16px 18px; font-size:.9rem; color:var(--ink-soft); margin-top:26px; }
+  .anchor-note b{ color:var(--ink); }
+
+  .skeleton{ color: var(--ink-soft); font-size:.9rem; font-style:italic; padding:10px 2px; }
+  .fetcherr{ color: var(--gold-deep); font-size:.85rem; padding:8px 2px; }
+
+  footer{ padding:40px 0 60px; font-size:.86rem; color:var(--ink-soft); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  footer a{ color:var(--teal); text-decoration:none; }
+  footer a:hover{ text-decoration:underline; }
+
+  /* Modal */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(20,20,20,.55); display:none; align-items:center; justify-content:center; z-index:50; padding:24px; }
+  .modal-overlay.open{ display:flex; }
+  .modal{ background:var(--panel); border:1px solid var(--rule); border-radius:6px; width:100%; max-width:900px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; border-bottom:1px solid var(--paper-line); }
+  .modal-head h3{ margin:0; font-family:"IBM Plex Mono",monospace; font-size:.9rem; color:var(--ink); font-weight:500; }
+  .modal-close{ background:none; border:1px solid var(--rule); border-radius:3px; width:28px; height:28px; cursor:pointer; color:var(--ink-soft); font-size:1rem; line-height:1; }
+  .modal-close:hover{ background:var(--rule); }
+  .modal-body{ overflow:auto; flex:1; }
+  .modal-body iframe{ width:100%; height:70vh; border:none; display:block; background:#fff; }
+  .modal-body .mdwrap{ padding:26px 30px; }
+  .modal-foot{ padding:10px 18px; border-top:1px solid var(--paper-line); display:flex; gap:10px; justify-content:flex-end; }
+
+  .mdwrap h1,.mdwrap h2,.mdwrap h3{ font-family:"Newsreader",Georgia,serif; font-weight:500; color:var(--ink); }
+  .mdwrap h1{ font-size:1.6rem; } .mdwrap h2{ font-size:1.3rem; margin-top:1.8em; } .mdwrap h3{ font-size:1.05rem; }
+  .mdwrap p, .mdwrap li{ color: var(--ink); font-size:.96rem; }
+  .mdwrap table{ border-collapse:collapse; width:100%; font-size:.88rem; margin:1em 0; }
+  .mdwrap th,.mdwrap td{ border:1px solid var(--paper-line); padding:6px 10px; text-align:left; }
+  .mdwrap code{ background:var(--paper); padding:1px 5px; border-radius:3px; font-size:.85em; }
+  .mdwrap blockquote{ border-left:3px solid var(--gold); margin:1em 0; padding:2px 16px; color:var(--ink-soft); }
+
+  @media (max-width:600px){
+    header.hero{ padding:44px 0 30px; } section.block{ padding:38px 0; }
+    .block-head{ flex-direction:column; gap:4px; } .btnrow{ margin-left:0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8a7 7 0 1 1 14 0 7 7 0 0 1-14 0Z" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5v3.8l2.6 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      bbmdkp2027matt1
+    </div>
+    <h1>Matematik Tingkatan&nbsp;1, Kurikulum Persekolahan 2027</h1>
+    <p class="lede">Alat interaktif bilik darjah dan bank pengetahuan guru untuk pelaksanaan KP2027 — dibina daripada dokumen kurikulum, slaid BPK, dan analisis bengkel penataran. Senarai di bawah dipapar terus daripada repo dan bertambah automatik apabila fail baharu ditambah.</p>
+    <div class="hierarchy">
+      <span>Hierarki sumber:</span>
+      <span class="seg"><b>DKP</b></span><span class="arrow">→</span>
+      <span class="seg">Slaid BPK</span><span class="arrow">→</span>
+      <span class="seg">Analisis Bengkel</span><span class="arrow">→</span>
+      <span class="seg">Kajian Luar</span>
+    </div>
+    <nav class="jump">
+      <a href="#alat">Alat Interaktif</a>
+      <a href="#kb">Bank Pengetahuan Guru</a>
+      <a href="README.md">README</a>
+    </nav>
+  </header>
+
+  <section class="block" id="alat">
+    <div class="block-head">
+      <h2>Alat Interaktif</h2>
+      <span class="tally" id="alat-tally">memuatkan…</span>
+    </div>
+    <p class="block-note">Fail HTML berdiri sendiri. Klik <b>pratonton</b> untuk cuba terus di halaman ini, atau <b>buka</b> untuk guna skrin penuh di kelas.</p>
+    <div id="alat-folders"></div>
+  </section>
+
+  <section class="block" id="kb">
+    <div class="block-head">
+      <h2>Bank Pengetahuan Guru</h2>
+      <span class="tally" id="kb-tally">memuatkan…</span>
+    </div>
+    <p class="block-note">Rujukan mendalam konsep pedagogi Matematik T1. Klik tajuk untuk pratonton kandungan terus di halaman ini.</p>
+    <ol class="kb" id="kb-list"></ol>
+    <div class="anchor-note">
+      <b>Nota autoriti sumber:</b> Kandungan Bank Pengetahuan ini disokong kajian luar (NCTM, Bruner, Van Hiele, Pólya, Vygotsky, UNESCO, TIMSS) semata-mata untuk menerangkan <em>kenapa</em> amalan berkesan — DKP kekal sebagai autoriti muktamad apabila timbul percanggahan.
+    </div>
+  </section>
+
+  <footer>
+    <span>Bertaraf perkongsian dalaman daerah. Sila rujuk DKP rasmi (Edaran Terhad) untuk arahan pelaksanaan penuh.</span>
+    <a href="README.md">Baca README</a>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h3 id="modal-title">Pratonton</h3>
+      <button class="modal-close" id="modal-close" aria-label="Tutup">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   KONFIGURASI — isi GITHUB_OWNER dengan username/organisasi GitHub
+   sebenar bagi repo ini supaya senarai automatik & pautan sumbangan
+   berfungsi. REPO dan BRANCH sudah betul mengikut repo semasa.
+   ============================================================ */
+const GITHUB_OWNER  = "GANTI_DENGAN_USERNAME_GITHUB_ANDA";
+const REPO           = "bbmdkp2027matt1";
+const BRANCH          = "main";
+
+const TOOL_FOLDERS = [
+  { path:"gamifikasi", label:"gamifikasi", desc:"Aktiviti berunsur permainan untuk latihan konsep secara interaktif" },
+  { path:"inkuiri-statistik", label:"inkuiri-statistik", desc:"Sokongan digital untuk model Inkuiri Statistik 5 Langkah" },
+  { path:"model-bar", label:"model-bar", desc:"Sokongan CPA Approach — jambatan visual sebelum algebra formal" },
+  { path:"perisian-dinamik", label:"perisian-dinamik", desc:"Penerokaan Sukatan & Geometri gaya GeoGebra/Desmos" },
+];
+
+const TOOL_DESCRIPTIONS = {
+  "gamifikasi/gamifikasi-nisbah-setara.html": "Permainan latihan mengenal pasti nisbah setara",
+  "inkuiri-statistik/wizard-inkuiri-statistik.html": "Panduan langkah demi langkah — Tanya → Rancang → Kumpul → Analisis → Tafsir",
+  "inkuiri-statistik/alat-perwakilan-data.html": "Alat bina carta/perwakilan visual daripada data yang dikumpul murid",
+  "model-bar/model-bar-interaktif.html": "Lukis dan laras Model Bar secara interaktif untuk masalah berayat",
+  "perisian-dinamik/geometri-garis-selari.html": "Penerokaan sifat garis selari dan sudut berkaitan",
+  "perisian-dinamik/geometri-jenis-sudut.html": "Kenal pasti dan bandingkan jenis-jenis sudut secara visual",
+  "perisian-dinamik/geometri-pembinaan-kompas.html": "Latihan pembinaan geometri guna jangka lukis/kompas digital",
+  "perisian-dinamik/geometri-segitiga-sisiempat.html": "Penerokaan sifat segi tiga dan sisi empat",
+};
+
+const KB_DESCRIPTIONS = {
+  "00_peta_knowledge_base.md": "Rangka hubungan keseluruhan (Mermaid) dan hierarki sumber",
+  "01_pengenalan_dokumen.md": "Konteks DKP/BPK/Bengkel dan asas Pedagogical Content Knowledge",
+  "02_kompetensi_matematik.md": "5 Standard Proses, Fikrah, Competency-Oriented",
+  "03_kemahiran_matematik.md": "Mental Calculation, Number Sense, Hukum Aritmetik",
+  "04_pedagogi_dan_pdpc.md": "Scaffolding, Pembelajaran Terbeza, Gamifikasi, Unlearn & Relearn",
+  "05_cpa_dan_model_bar.md": "Jambatan Concrete-Pictorial-Abstract sebelum algebra formal",
+  "06_pendekatan_induktif_dan_inkuiri.md": "Khusus ke umum, dan Inkuiri Statistik 5 Langkah",
+  "07_penyelesaian_masalah_dan_heuristik.md": "Cuba jaya, lihat pola, Model Empat Langkah Pólya",
+  "08_penaakulan_dan_komunikasi.md": "Justifikasi, verifikasi, dan tafsiran data",
+  "09_perwakilan_matematik.md": "Representasi, Teori Van Hiele, Gambar Rajah Venn",
+  "10_pemikiran_algebra.md": "Ungkapan Algebra, Pemboleh Ubah, miskonsepsi \"=\"",
+  "11_pbl_dan_kmr.md": "Pembelajaran Berasaskan Projek, Kefahaman melalui Reka Bentuk",
+  "12_pentaksiran_dan_tp.md": "Model Miller, formatif harian vs pelaporan SPi",
+  "13_miskonsepsi_dan_kesilapan.md": "Jadual kesilapan lazim merentas semua topik T1",
+  "14_glosari_istilah.md": "Peta navigasi BM/BI ke semua fail konsep",
+  "15_bacaan_lanjutan.md": "Rujukan kajian luar terkumpul, disahkan wujud",
+};
+
+/* ---------- util: senarai direktori GitHub (cache 5 minit) ---------- */
+async function listDir(path){
+  const cacheKey = "ghdir:" + REPO + ":" + BRANCH + ":" + path;
+  const cached = sessionStorage.getItem(cacheKey);
+  if(cached){
+    const parsed = JSON.parse(cached);
+    if(Date.now() - parsed.t < 5*60*1000) return parsed.data;
+  }
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`;
+  const res = await fetch(url, { headers: { "Accept":"application/vnd.github+json" } });
+  if(!res.ok) throw new Error("GitHub API " + res.status);
+  const data = await res.json();
+  sessionStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), data }));
+  return data;
+}
+
+function titleFromFilename(name){
+  return name.replace(/\.(html|md)$/,"").replace(/^[0-9]+_/,"").replace(/[-_]/g," ")
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function githubEditUrl(path){
+  return `https://github.com/${GITHUB_OWNER}/${REPO}/edit/${BRANCH}/${path}`;
+}
+function githubTreeUrl(path){
+  return `https://github.com/${GITHUB_OWNER}/${REPO}/tree/${BRANCH}/${path}`;
+}
+function githubNewIssueUrl(folderLabel){
+  const title = encodeURIComponent(`Cadangan tambah baik: ${folderLabel}`);
+  return `https://github.com/${GITHUB_OWNER}/${REPO}/issues/new?title=${title}`;
+}
+
+/* ---------- modal ---------- */
+const overlay = document.getElementById("modal-overlay");
+const modalTitle = document.getElementById("modal-title");
+const modalBody = document.getElementById("modal-body");
+const modalFoot = document.getElementById("modal-foot");
+
+function openModal(title){
+  modalTitle.textContent = title;
+  overlay.classList.add("open");
+  document.getElementById("modal-close").focus();
+}
+function closeModal(){
+  overlay.classList.remove("open");
+  modalBody.innerHTML = "";
+  modalFoot.innerHTML = "";
+}
+document.getElementById("modal-close").addEventListener("click", closeModal);
+overlay.addEventListener("click", e => { if(e.target === overlay) closeModal(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+
+function previewTool(path, label){
+  openModal(label);
+  modalBody.innerHTML = `<iframe src="${path}" title="${label}"></iframe>`;
+  modalFoot.innerHTML = `<a class="btn" href="${path}" target="_blank" rel="noopener">Buka skrin penuh</a>`;
+}
+
+async function previewMarkdown(path, label){
+  openModal(label);
+  modalBody.innerHTML = `<div class="mdwrap"><p class="skeleton">Memuatkan pratonton…</p></div>`;
+  try{
+    const res = await fetch(path);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    const html = window.marked ? marked.parse(text) : "<pre>" + text.replace(/</g,"&lt;") + "</pre>";
+    modalBody.innerHTML = `<div class="mdwrap">${html}</div>`;
+  }catch(err){
+    modalBody.innerHTML = `<div class="mdwrap"><p class="fetcherr">Tidak dapat memuatkan pratonton (${err.message}). Sila buka fail terus.</p></div>`;
+  }
+  modalFoot.innerHTML = `<a class="btn ghost" href="https://github.com/${GITHUB_OWNER}/${REPO}/blob/${BRANCH}/${path}" target="_blank" rel="noopener">Lihat di GitHub</a>
+    <a class="btn" href="${path}" target="_blank" rel="noopener">Buka fail asal</a>`;
+}
+
+/* ---------- render: Alat Interaktif ---------- */
+function contributeIcon(){
+  return `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2 3 6v5c0 4 3 6.5 7 7 4-.5 7-3 7-7V6l-7-4Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M7.5 10.2 9.2 12l3.3-3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+async function renderToolFolders(){
+  const wrap = document.getElementById("alat-folders");
+  let totalFiles = 0;
+  for(const folder of TOOL_FOLDERS){
+    const section = document.createElement("div");
+    section.className = "folder";
+    section.innerHTML = `
+      <div class="folder-head">
+        <span class="folder-name">/${folder.path}</span>
+        <span class="folder-desc">${folder.desc}</span>
+      </div>
+      <ul class="filelist"><li class="skeleton">Memuatkan senarai fail…</li></ul>
+      <div class="contribute">
+        ${contributeIcon()}
+        <div>
+          <p><b>Bantu tambah baik alat ini.</b> Nampak sesuatu boleh dipertingkat, atau ada idea aktiviti baharu untuk folder ini? Rakan guru dialu-alukan menyumbang.</p>
+          <div class="links">
+            <a class="btn" href="${githubTreeUrl(folder.path)}" target="_blank" rel="noopener">Lihat &amp; sunting di GitHub</a>
+            <a class="btn ghost" href="${githubNewIssueUrl(folder.label)}" target="_blank" rel="noopener">Cadangkan penambahbaikan</a>
+          </div>
+        </div>
+      </div>`;
+    wrap.appendChild(section);
+
+    const listEl = section.querySelector("ul.filelist");
+    try{
+      const items = await listDir(folder.path);
+      const files = items.filter(it => it.type === "file" && it.name.endsWith(".html"));
+      totalFiles += files.length;
+      listEl.innerHTML = "";
+      if(files.length === 0){
+        listEl.innerHTML = `<li class="skeleton">Belum ada fail dalam folder ini.</li>`;
+        continue;
+      }
+      files.forEach(f => {
+        const relPath = folder.path + "/" + f.name;
+        const desc = TOOL_DESCRIPTIONS[relPath] || titleFromFilename(f.name);
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <a class="file" href="${relPath}" target="_blank" rel="noopener">${f.name}</a>
+          <span class="filedesc">${desc}</span>
+          <span class="btnrow">
+            <button class="btn" data-preview-tool="${relPath}" data-label="${f.name}">pratonton</button>
+            <a class="btn ghost" href="${relPath}" target="_blank" rel="noopener">buka</a>
+          </span>`;
+        listEl.appendChild(li);
+      });
+    }catch(err){
+      listEl.innerHTML = `<li class="fetcherr">Senarai automatik tidak tersedia buat masa ini (${err.message}). Layari folder terus di <a href="${githubTreeUrl(folder.path)}" target="_blank" rel="noopener">GitHub</a>.</li>`;
+    }
+  }
+  document.getElementById("alat-tally").textContent = `${TOOL_FOLDERS.length} folder, ${totalFiles} fail`;
+  wrap.addEventListener("click", e => {
+    const btn = e.target.closest("[data-preview-tool]");
+    if(btn) previewTool(btn.dataset.previewTool, btn.dataset.label);
+  });
+}
+
+/* ---------- render: Bank Pengetahuan Guru ---------- */
+async function renderKbList(){
+  const listEl = document.getElementById("kb-list");
+  listEl.innerHTML = `<li class="skeleton">Memuatkan senarai fail…</li>`;
+  try{
+    const items = await listDir("kb");
+    const files = items.filter(it => it.type === "file" && it.name.endsWith(".md"))
+                        .sort((a,b) => a.name.localeCompare(b.name));
+    listEl.innerHTML = "";
+    files.forEach(f => {
+      const relPath = "kb/" + f.name;
+      const desc = KB_DESCRIPTIONS[f.name] || titleFromFilename(f.name);
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="kbrow">
+          <button class="kbtitle" data-preview-md="${relPath}" data-label="${titleFromFilename(f.name)}">${titleFromFilename(f.name)}</button>
+        </div>
+        <span class="kbdesc">${desc}</span>`;
+      listEl.appendChild(li);
+    });
+    document.getElementById("kb-tally").textContent = `${files.length} fail`;
+  }catch(err){
+    listEl.innerHTML = `<li class="fetcherr">Senarai automatik tidak tersedia buat masa ini (${err.message}). Layari folder <code>/kb</code> terus di GitHub.</li>`;
+    document.getElementById("kb-tally").textContent = "";
+  }
+  listEl.addEventListener("click", e => {
+    const btn = e.target.closest("[data-preview-md]");
+    if(btn) previewMarkdown(btn.dataset.previewMd, btn.dataset.label);
+  });
+}
+
+renderToolFolders();
+renderKbList();
+</script>
+
+</body>
+</html>
