@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Makmal Model Bar &amp; Jubin Algebra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Token: CG DIN Creative Editorial (peranan warna, tema cerah/gelap) */
+:root{
+  --navy:#14243A;--cobalt:#315EFB;--cream:#F7F3EA;--teal:#13A89E;--coral:#F07852;
+  --surface:#F7F3EA;--raised:#FFFDF8;--ink:#14243A;--muted:#5E6A7D;
+  --accent:#315EFB;--on-accent:#FFFFFF;--teal-text:#0B7A73;--coral-text:#B23A15;
+  --hair:rgba(20,36,58,.16);
+  --fd:"Manrope","Inter",Arial,sans-serif;--fb:"Aptos",Arial,sans-serif;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s6:24px;--s8:32px;
+  --r-sm:6px;--r-md:12px;--r-lg:20px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --surface:#14243A;--raised:#1C3150;--ink:#F7F3EA;--muted:#A3AEBF;--accent:#7C9CFF;--on-accent:#14243A;
+    --teal-text:#13A89E;--coral-text:#F07852;--hair:rgba(247,243,234,.16);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --surface:#14243A;--raised:#1C3150;--ink:#F7F3EA;--muted:#A3AEBF;--accent:#7C9CFF;--on-accent:#14243A;
+  --teal-text:#13A89E;--coral-text:#F07852;--hair:rgba(247,243,234,.16);color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--surface);color:var(--ink);font:400 16px/1.55 var(--fb)}
+body.proj{font-size:20px}
+.wrap{max-width:1120px;margin:0 auto;padding:var(--s4) var(--s4) var(--s8) var(--s4)}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Kepala */
+.top{display:flex;gap:var(--s3);align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.eyebrow{font:700 12px/16px var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s1)}
+h1{font:800 clamp(26px,5.4vw,40px)/1.1 var(--fd);letter-spacing:-.015em;margin:0}
+.lead{margin:var(--s2) 0 0;color:var(--muted);max-width:62ch}
+.tools{display:flex;gap:var(--s2);flex-wrap:wrap}
+
+/* Kawalan */
+.btn{border:1px solid var(--hair);background:var(--raised);border-radius:var(--r-sm);padding:9px 13px;font-weight:600;font-size:14px;cursor:pointer;min-height:40px}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.dng{color:var(--coral-text)}
+.btn.sm{padding:5px 10px;min-height:32px;font-size:13px}
+.btn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+input,select,textarea{background:var(--raised);border:1px solid var(--hair);border-radius:var(--r-sm);padding:8px 10px;min-height:40px;min-width:0}
+input[type=number]{width:74px}
+textarea{width:100%;resize:vertical;min-height:56px}
+.fld{display:flex;flex-direction:column;gap:var(--s1);font-size:13px;font-weight:600;color:var(--muted)}
+.fld input,.fld select{color:var(--ink);font-weight:400;font-size:15px}
+
+/* Tab */
+.tabs,.seg-ctl{display:flex;gap:var(--s2);margin-top:var(--s4);overflow-x:auto;padding-bottom:var(--s1)}
+.tab{flex:0 0 auto;padding:10px 16px;border:1px solid var(--hair);background:var(--raised);border-radius:var(--r-sm);font:700 15px var(--fb);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.seg-ctl{margin-top:var(--s3)}
+.seg-ctl .tab{font-size:14px;padding:8px 13px}
+
+.card{background:var(--raised);border:1px solid var(--hair);border-radius:var(--r-md);padding:var(--s4)}
+.card h2{font:700 12px/16px var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s3)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--s4);margin-top:var(--s4);align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.row{display:flex;gap:var(--s3);flex-wrap:wrap;align-items:flex-end;margin-bottom:var(--s3)}
+.stack{display:flex;flex-direction:column;gap:var(--s3)}
+.muted{color:var(--muted)}
+.small{font-size:14px;line-height:22px}
+.hint{font-size:14px;color:var(--muted);margin:var(--s2) 0 0}
+
+/* Model Bar */
+.qshow{font:700 18px/1.4 var(--fd);margin:0 0 var(--s3);padding:var(--s3);border-left:4px solid var(--teal);background:color-mix(in srgb,var(--teal) 10%,var(--raised));border-radius:0 var(--r-sm) var(--r-sm) 0}
+.brace{position:relative;height:22px;border:2px solid var(--ink);border-bottom:none;border-radius:6px 6px 0 0;margin-bottom:6px;text-align:center}
+.brace span{position:relative;top:-14px;background:var(--raised);padding:0 var(--s2);font:700 15px var(--fd)}
+.brace.calc span{color:var(--coral-text)}
+.track{display:flex;border:2px solid var(--ink);border-radius:var(--r-sm);overflow:hidden;min-height:78px}
+.seg{flex:1 1 0;min-width:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px;border-right:2px solid var(--ink);text-align:center;overflow:hidden}
+.seg:last-child{border-right:none}
+.seg.s0{background:color-mix(in srgb,var(--accent) 20%,var(--raised))}
+.seg.s1{background:color-mix(in srgb,var(--teal) 24%,var(--raised))}
+.seg.unk{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--coral) 35%,var(--raised)) 0 6px,var(--raised) 6px 12px)}
+.sv{font:800 20px/1.1 var(--fd)}
+.seg.calc .sv{color:var(--coral-text)}
+.sl{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.crow{display:grid;grid-template-columns:72px minmax(0,1fr) 78px;gap:var(--s2);align-items:center;margin-bottom:var(--s2)}
+.crow .cl{font-weight:700;overflow-wrap:anywhere}
+.crow .cr{font:800 16px var(--fd);text-align:right}
+.crow .cr.calc{color:var(--coral-text)}
+.crow .cr.unk{color:var(--coral-text)}
+.ct{display:flex;width:100%}
+.u{flex:0 0 auto;height:44px;border:2px solid var(--ink);border-right-width:0;display:flex;align-items:center;justify-content:center;font:700 13px var(--fd);background:color-mix(in srgb,var(--accent) 20%,var(--raised));overflow:hidden}
+.u.b1{background:color-mix(in srgb,var(--teal) 26%,var(--raised))}
+.u.b2{background:color-mix(in srgb,var(--coral) 28%,var(--raised))}
+.u.b3{background:color-mix(in srgb,var(--ink) 12%,var(--raised))}
+.u.last{border-right-width:2px}
+.u.xtra{outline:3px dashed var(--teal-text);outline-offset:-5px}
+.legend{font-size:13px;color:var(--muted);margin-top:var(--s2)}
+.res{margin-top:var(--s4);padding:var(--s3) var(--s4);border-radius:var(--r-md);border:1px solid var(--hair);background:var(--raised)}
+.res.ok{border-left:5px solid var(--teal)}
+.res.err{border-left:5px solid var(--coral)}
+.res.info{border-left:5px solid var(--accent)}
+.verdict{font-weight:700;margin:0 0 var(--s2)}
+.res ol{margin:0;padding-left:20px}
+.res li{margin:2px 0}
+.bridge{margin-top:var(--s3);padding:var(--s3);border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 10%,var(--raised))}
+.bridge b{font-family:var(--fd)}
+.pr{display:grid;grid-template-columns:minmax(0,1fr) 84px 32px;gap:var(--s2);margin-bottom:var(--s2);align-items:center}
+.cr2{display:grid;grid-template-columns:minmax(0,1fr) auto 84px 32px;gap:var(--s2);margin-bottom:var(--s2);align-items:center}
+.step{display:inline-flex;align-items:center;gap:4px}
+.step b{min-width:24px;text-align:center}
+details{margin-top:var(--s3)}
+summary{cursor:pointer;font-weight:700}
+
+/* Jubin */
+.cvbox{width:100%}
+.cv{position:relative;border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden;background-color:var(--raised);
+  background-image:radial-gradient(color-mix(in srgb,var(--ink) 24%,transparent) 1px,transparent 1.3px);background-size:16px 16px;touch-action:none}
+.cvin{position:absolute;left:0;top:0;transform-origin:0 0}
+.tile{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:3px;font:700 14px/1 var(--fb);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;overflow:hidden}
+.tile:active{cursor:grabbing}
+.t-x2{--c:var(--cobalt);--tc:#fff}
+.t-x{--c:var(--teal);--tc:var(--navy)}
+.t-1{--c:var(--coral);--tc:var(--navy)}
+.tile.pos{background:var(--c);color:var(--tc);box-shadow:inset 0 0 0 1px rgba(20,36,58,.45)}
+.tile.neg{background:repeating-linear-gradient(135deg,var(--c) 0 4px,var(--raised) 4px 9px);color:var(--ink);box-shadow:inset 0 0 0 2px var(--c)}
+.tile .lb{padding:1px 3px;border-radius:3px}
+.tile.neg .lb{background:var(--raised)}
+.tile.sel{outline:3px solid var(--accent);outline-offset:2px;z-index:999!important}
+.tile.pair{outline:3px dashed var(--coral-text);outline-offset:1px}
+.tile.flat{cursor:default}
+.tile.inl{position:relative;flex:0 0 auto}
+.ph{position:absolute;border:1px dashed color-mix(in srgb,var(--ink) 35%,transparent);border-radius:3px}
+.flab{position:absolute;font:800 18px var(--fd);white-space:nowrap}
+.palette{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s3)}
+.chip{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:62px;padding:8px 10px 6px;background:var(--raised);border:1px solid var(--hair);border-radius:var(--r-sm);font-weight:700;font-size:13px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.chip:hover{border-color:var(--accent)}
+.chip .sw{position:relative}
+.big{font:800 clamp(24px,4vw,30px)/1.2 var(--fd);overflow-wrap:anywhere;min-height:1.2em}
+.lines{margin:var(--s3) 0 0}
+.lines div{display:flex;justify-content:space-between;gap:var(--s3);padding:7px 0;border-top:1px solid var(--hair);font-size:14px}
+.lines dt{color:var(--muted)}
+.lines dd{margin:0;font-weight:700;text-align:right}
+.note{margin-top:var(--s3);padding:var(--s3);border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 10%,var(--raised));font-size:14px}
+.note:empty{display:none}
+.note.ok{background:color-mix(in srgb,var(--teal) 16%,var(--raised))}
+.note.err{background:color-mix(in srgb,var(--coral) 18%,var(--raised))}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s3)}
+.actions .wide{grid-column:1/-1}
+.fx{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin-bottom:var(--s3)}
+.fx .nm{font-weight:700;min-width:70px}
+.fx label{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted)}
+.fx .res-t{font:800 18px var(--fd);color:var(--ink)}
+.fx .hd{flex:1 0 100%;display:flex;gap:var(--s3);align-items:baseline}
+.fx input[type=number]{width:62px}
+input[type=checkbox]{min-height:0;width:20px;height:20px;padding:0;accent-color:var(--accent)}
+@media (max-width:560px){
+  .crow{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l v" "t t";row-gap:4px;margin-bottom:var(--s3)}
+  .crow .cl{grid-area:l}.crow .ct{grid-area:t}.crow .cr{grid-area:v}
+}
+.tilebar{display:flex;flex-wrap:wrap;gap:4px;margin:var(--s2) 0 var(--s3)}
+
+/* Persamaan */
+.eq-big{font:800 clamp(26px,5vw,36px)/1.2 var(--fd);text-align:center;margin:var(--s2) 0 var(--s3)}
+.eq-pans{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);gap:var(--s2);align-items:stretch}
+.pan{border:2px solid var(--ink);border-radius:var(--r-md);padding:var(--s2);min-height:150px;background:var(--raised)}
+.pan h3{font:700 12px/16px var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s2)}
+.pan-t{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start}
+.eq-sign{display:flex;align-items:center;justify-content:center;font:800 28px var(--fd)}
+.eq-ops{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3);align-items:center}
+.eq-ops .grp{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.eq-ops .gl{font-size:13px;font-weight:700;color:var(--muted)}
+.log{margin:var(--s3) 0 0;padding-left:22px}
+.log li{margin:3px 0}
+.log .eqs{font-family:var(--fd);font-weight:700}
+@media (prefers-reduced-motion:no-preference){.btn,.tab,.chip{transition:border-color .12s,background-color .12s}.tile.pair{animation:pul 1.1s ease-in-out infinite}}
+@keyframes pul{50%{outline-offset:4px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div>
+    <p class="eyebrow">CG DIN · Alat manipulatif Matematik</p>
+    <h1>Makmal Model Bar &amp; Jubin Algebra</h1>
+    <p class="lead">Konkrit dahulu, kemudian gambar rajah, kemudian simbol. Bina model, baca nilainya, dan sambungkan ke algebra.</p>
+  </div>
+  <div class="tools">
+    <button class="btn" id="btn-proj" aria-pressed="false" title="Teks lebih besar untuk projektor">Mod projektor</button>
+    <button class="btn" id="btn-theme" title="Tukar tema cerah atau gelap">Tema</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs" role="tablist" aria-label="Pilih alat">
+  <button class="tab" role="tab" data-v="bar" aria-selected="true">Model Bar</button>
+  <button class="tab" role="tab" data-v="tiles" aria-selected="false">Jubin Algebra</button>
+</nav>
+
+<!-- ======================= MODEL BAR ======================= -->
+<section class="view" id="view-bar">
+  <div class="seg-ctl" id="bar-modes" role="tablist" aria-label="Jenis model bar">
+    <button class="tab" role="tab" data-m="pw" aria-selected="true">Bahagian–Keseluruhan</button>
+    <button class="tab" role="tab" data-m="cmp" aria-selected="false">Perbandingan &amp; Nisbah</button>
+  </div>
+  <div class="grid2">
+    <div class="stack">
+      <div class="card">
+        <h2>Soalan</h2>
+        <div class="row">
+          <label class="fld" style="flex:1 1 220px"><span>Contoh soalan</span>
+            <select id="bar-preset"></select></label>
+          <label class="fld"><span>Unit (cth: RM, kg, murid)</span>
+            <input id="bar-unit" style="width:150px" placeholder="tiada" autocomplete="off"></label>
+        </div>
+        <label class="fld"><span>Teks soalan (pilihan, dipaparkan di atas model)</span>
+          <textarea id="bar-q" rows="2" placeholder="Tulis atau tampal soalan di sini"></textarea></label>
+      </div>
+      <div class="card">
+        <h2>Maklumat</h2>
+        <div id="bar-ctl"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <h2>Model</h2>
+        <p class="qshow" id="bar-qshow" hidden></p>
+        <div id="bar-vis" role="img" aria-label="Model bar"></div>
+        <div id="bar-res" aria-live="polite"></div>
+      </div>
+      <details class="card" id="bar-notes">
+        <summary>Nota guru: miskonsepsi lazim dan cara mengesan</summary>
+        <p class="small muted">Cadangan saya berdasarkan amalan pengajaran umum. Sahkan dengan DSKP dan pengalaman kelas anda.</p>
+        <ul class="small">
+          <li><b>Bar tidak berkadar.</b> Murid lukis bahagian sama panjang walaupun nilai berbeza. Kesan: minta murid ramal bahagian mana paling panjang sebelum memasukkan nilai.</li>
+          <li><b>Salah pilih model.</b> Menggunakan bahagian–keseluruhan untuk soalan "lebih daripada". Kesan: tanya "adakah dua kuantiti dibandingkan, atau satu keseluruhan dipecahkan?"</li>
+          <li><b>Nisbah dianggap nilai.</b> Nisbah 3 : 2 dibaca sebagai 3 dan 2 ringgit. Kesan: tanya "berapa nilai satu unit?"</li>
+          <li><b>Unit tidak sama saiz.</b> Dalam model perbandingan semua unit mesti sama. Alat ini memaksa saiz unit sama.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= JUBIN ALGEBRA ======================= -->
+<section class="view" id="view-tiles" hidden>
+  <div class="seg-ctl" id="tl-modes" role="tablist" aria-label="Mod jubin">
+    <button class="tab" role="tab" data-m="free" aria-selected="true">Bebas</button>
+    <button class="tab" role="tab" data-m="expand" aria-selected="false">Pengembangan</button>
+    <button class="tab" role="tab" data-m="factor" aria-selected="false">Pemfaktoran</button>
+    <button class="tab" role="tab" data-m="eq" aria-selected="false">Persamaan</button>
+  </div>
+  <div class="grid2" id="tl-grid">
+    <div class="card" id="tl-stage">
+      <div id="tl-ctl"></div>
+      <div class="palette" id="tl-pal"></div>
+      <div class="cvbox" id="cvbox"><div class="cv" id="cv"><div class="cvin" id="cvin"></div></div></div>
+      <p class="hint" id="tl-hint"></p>
+    </div>
+    <aside class="card" id="tl-panel">
+      <h2 id="tl-ptitle">Ungkapan</h2>
+      <div class="big" id="tl-big" aria-live="polite"></div>
+      <dl class="lines" id="tl-lines"></dl>
+      <div class="note" id="tl-note"></div>
+      <div class="actions" id="tl-actions"></div>
+    </aside>
+  </div>
+  <div class="card" id="eq-card" hidden style="margin-top:16px"></div>
+  <p class="hint">Jubin x sengaja bukan gandaan bulat jubin 1 supaya murid tidak menyangka x ialah nombor tertentu. Corak berjalur bermaksud negatif.</p>
+</section>
+</div>
+<script>
+(function(){
+'use strict';
+/* ---------- Pembantu ---------- */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const MIN='−';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=v=>{const r=Math.round(v*10000)/10000;return String(r).replace('-',MIN);};
+const num=v=>{v=String(v==null?'':v).trim().replace(',','.').replace(MIN,'-');if(v===''||v==='?')return null;const n=Number(v);return Number.isFinite(n)?n:NaN;};
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+const clampInt=(v,lo,hi)=>{v=parseInt(v,10);if(!Number.isFinite(v))v=0;return Math.max(lo,Math.min(hi,v));};
+const el=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
+
+/* Polinomial: [x2, x, 1] */
+function poly(c){
+  const nm=['x²','x',''];const out=[];
+  c.forEach((v,i)=>{
+    if(!v)return;const a=Math.abs(v);
+    const body=nm[i]===''?String(a):(a===1?'':String(a))+nm[i];
+    out.push({neg:v<0,body:body});
+  });
+  if(!out.length)return '0';
+  return out.map((p,i)=>i===0?(p.neg?MIN:'')+p.body:(p.neg?' '+MIN+' ':' + ')+p.body).join('');
+}
+function lin(a,b){return poly([0,a,b]);}  /* ax + b */
+
+/* ---------- Tema, projektor, tab utama ---------- */
+const root=document.documentElement;
+$('#btn-theme').addEventListener('click',()=>{
+  const dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme=dark?'light':'dark';
+});
+$('#btn-proj').addEventListener('click',e=>{
+  const on=document.body.classList.toggle('proj');e.currentTarget.setAttribute('aria-pressed',String(on));
+  if(typeof fitCanvas==='function')setTimeout(fitCanvas,30);
+});
+function showView(id){
+  $$('.view').forEach(v=>{v.hidden=v.id!=='view-'+id;});
+  $$('#tabs .tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.v===id)));
+  if(id==='tiles')setTimeout(()=>{if(!T.init){T.init=true;setTileMode('free');}else fitCanvas();},0);
+}
+$$('#tabs .tab').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
+
+/* =====================================================================
+   MODEL BAR
+   ===================================================================== */
+const BS={
+  mode:'pw',unit:'RM',q:'',
+  pw:{total:'100',parts:[{l:'buku',v:'20'},{l:'makan',v:'30'},{l:'baki',v:''}]},
+  cmp:{bars:[{l:'Ali',n:3,v:''},{l:'Bakar',n:2,v:''}],sum:'100',diff:''}
+};
+const PRESETS=[
+  {name:'Baki wang (bahagian hilang)',mode:'pw',unit:'RM',q:'Ali ada RM100. Dia membelanjakan RM20 untuk buku dan RM30 untuk makan. Berapakah bakinya?',
+    pw:{total:'100',parts:[{l:'buku',v:'20'},{l:'makan',v:'30'},{l:'baki',v:''}]}},
+  {name:'Jumlah tidak diketahui',mode:'pw',unit:'biji',q:'Tiga bakul masing-masing mengandungi 12, 15 dan 9 biji epal. Berapakah jumlah epal?',
+    pw:{total:'',parts:[{l:'bakul 1',v:'12'},{l:'bakul 2',v:'15'},{l:'bakul 3',v:'9'}]}},
+  {name:'Nisbah 3 : 2 dan jumlah diketahui',mode:'cmp',unit:'RM',q:'Wang Ali dan wang Bakar dalam nisbah 3 : 2. Jumlah wang mereka ialah RM100. Berapakah wang setiap orang?',
+    cmp:{bars:[{l:'Ali',n:3,v:''},{l:'Bakar',n:2,v:''}],sum:'100',diff:''}},
+  {name:'Beza diketahui',mode:'cmp',unit:'tahun',q:'Nisbah umur Ayah kepada umur Adik ialah 5 : 2. Ayah 21 tahun lebih tua daripada Adik. Berapakah umur mereka?',
+    cmp:{bars:[{l:'Ayah',n:5,v:''},{l:'Adik',n:2,v:''}],sum:'',diff:'21'}},
+  {name:'Satu bar diketahui',mode:'cmp',unit:'buah',q:'Nisbah buku Sains kepada buku Matematik ialah 4 : 3. Terdapat 24 buah buku Matematik. Berapakah jumlah semua buku?',
+    cmp:{bars:[{l:'Sains',n:4,v:''},{l:'Matematik',n:3,v:'24'}],sum:'',diff:''}},
+  {name:'Tiga bahagian 2 : 3 : 5',mode:'cmp',unit:'keping',q:'Tiga orang berkongsi 80 keping kad dalam nisbah 2 : 3 : 5. Berapakah bahagian setiap orang?',
+    cmp:{bars:[{l:'A',n:2,v:''},{l:'B',n:3,v:''},{l:'C',n:5,v:''}],sum:'80',diff:''}}
+];
+
+function money(n){
+  const u=BS.unit.trim(),t=fmt(n);
+  if(!u)return t;
+  return /^(rm|\$)$/i.test(u)?(u.toLowerCase()==='rm'?'RM':u)+t:t+' '+u;
+}
+
+/* ---- Penyelesai Bahagian–Keseluruhan ---- */
+function solvePW(){
+  const T=num(BS.pw.total),P=BS.pw.parts.map(p=>num(p.v));
+  const out={sT:T,sP:P.slice(),steps:[],verdict:'',kind:'info',alg:''};
+  const all=[T].concat(P);
+  if(all.some(v=>Number.isNaN(v))){out.verdict='Ada nilai yang bukan nombor. Taip nombor sahaja, atau kosongkan untuk tanda ?.';out.kind='err';return out;}
+  if(all.some(v=>v!==null&&v<0)){out.verdict='Model bar menggunakan kuantiti positif. Semak nilai negatif.';out.kind='err';return out;}
+  const lab=i=>(BS.pw.parts[i].l||'').trim()||('bahagian '+(i+1));
+  const unk=[];if(T===null)unk.push(-1);P.forEach((v,i)=>{if(v===null)unk.push(i);});
+  const known=P.map((v,i)=>({v,i})).filter(o=>o.v!==null);
+  const sumK=known.reduce((a,o)=>a+o.v,0);
+  if(unk.length===0){
+    if(Math.abs(sumK-T)<1e-9){out.verdict='Betul: jumlah semua bahagian sama dengan jumlah.';out.kind='ok';}
+    else{out.verdict='Tidak sepadan: bahagian berjumlah '+money(sumK)+' tetapi jumlah ialah '+money(T)+'.';out.kind='err';}
+    out.steps.push(known.map(o=>fmt(o.v)).join(' + ')+' = '+fmt(sumK));
+    return out;
+  }
+  if(unk.length>1){
+    out.verdict='Maklumat belum cukup: ada '+unk.length+' nilai yang belum diketahui. Beri nilai sehingga tinggal satu tanda ?.';
+    out.kind='info';return out;
+  }
+  const u=unk[0];
+  if(u===-1){
+    out.sT=sumK;out.kind='ok';out.verdict='Jumlah ialah '+money(sumK)+'.';
+    out.steps.push('Jumlah = '+known.map(o=>fmt(o.v)).join(' + ')+' = '+fmt(sumK));
+    out.alg='Biar jumlah = <b>x</b>. Maka <b>x = '+known.map(o=>fmt(o.v)).join(' + ')+' = '+fmt(sumK)+'</b>.';
+    return out;
+  }
+  const val=T-sumK;
+  if(val<-1e-9){out.verdict='Bahagian yang diketahui ('+money(sumK)+') melebihi jumlah ('+money(T)+'). Semak nombor.';out.kind='err';return out;}
+  out.sP[u]=val;out.kind='ok';out.verdict='Nilai '+lab(u)+' ialah '+money(val)+'.';
+  out.steps.push(lab(u)+' = '+fmt(T)+' − '+known.map(o=>fmt(o.v)).join(' − ')+' = '+fmt(val));
+  out.alg='Biar yang tidak diketahui = <b>x</b>. '+known.map(o=>fmt(o.v)).join(' + ')+' + x = '+fmt(T)+
+    '<br>x = '+fmt(T)+' − '+fmt(sumK)+'<br><b>x = '+fmt(val)+'</b>';
+  return out;
+}
+
+/* ---- Penyelesai Perbandingan & Nisbah ---- */
+function solveCMP(){
+  const C=BS.cmp,n=C.bars.map(b=>b.n),V=C.bars.map(b=>num(b.v)),S=num(C.sum),D=num(C.diff);
+  const out={u:null,vals:V.slice(),verdict:'',kind:'info',steps:[],alg:'',S:S,D:D,calcVals:false};
+  const all=V.concat([S,D]);
+  if(all.some(v=>Number.isNaN(v))){out.verdict='Ada nilai yang bukan nombor. Taip nombor sahaja.';out.kind='err';return out;}
+  if(all.some(v=>v!==null&&v<0)){out.verdict='Gunakan nilai positif.';out.kind='err';return out;}
+  const N=n.reduce((a,b)=>a+b,0);
+  const nm=i=>(C.bars[i].l||'').trim()||('bar '+(i+1));
+  const cand=[];
+  V.forEach((v,i)=>{if(v!==null)cand.push({u:v/n[i],src:'nilai '+nm(i),d:fmt(v)+' ÷ '+n[i],alg:n[i]+'x = '+fmt(v)});});
+  if(S!==null)cand.push({u:S/N,src:'jumlah semua',d:fmt(S)+' ÷ ('+n.join(' + ')+')',alg:'('+n.join(' + ')+')x = '+fmt(S)+' → '+N+'x = '+fmt(S)});
+  if(D!==null){
+    const dn=Math.abs(n[0]-n[1]);
+    if(dn===0){
+      if(Math.abs(D)>1e-9){out.verdict='Bar '+nm(0)+' dan '+nm(1)+' sama panjang, jadi bezanya mesti 0.';out.kind='err';return out;}
+    }else{
+      const hi=Math.max(n[0],n[1]),lo=Math.min(n[0],n[1]);
+      cand.push({u:D/dn,src:'beza',d:fmt(D)+' ÷ ('+hi+' − '+lo+')',alg:'('+hi+' − '+lo+')x = '+fmt(D)+' → '+dn+'x = '+fmt(D)});
+    }
+  }
+  if(!cand.length){out.verdict='Masukkan satu maklumat: nilai satu bar, jumlah semua bar, atau beza dua bar pertama.';return out;}
+  const u0=cand[0].u;
+  const bad=cand.filter(c=>Math.abs(c.u-u0)>1e-9*Math.max(1,Math.abs(u0)));
+  if(bad.length){
+    out.kind='err';
+    out.verdict='Maklumat bercanggah: '+cand.map(c=>'daripada '+c.src+', 1 unit = '+fmt(c.u)).join('; ')+'.';
+    return out;
+  }
+  out.u=u0;out.kind='ok';
+  out.vals=n.map(k=>k*u0);out.calcVals=true;
+  out.verdict='1 unit = '+money(u0)+(cand.length>1?'. Semua '+cand.length+' maklumat sepadan.':'.');
+  out.steps.push('1 unit = '+cand[0].d+' = '+fmt(u0));
+  n.forEach((k,i)=>out.steps.push(nm(i)+': '+k+' × '+fmt(u0)+' = '+fmt(k*u0)));
+  if(n.length>1){
+    out.steps.push('Jumlah semua = '+N+' × '+fmt(u0)+' = '+fmt(N*u0));
+    if(n[0]!==n[1])out.steps.push('Beza '+nm(0)+' dan '+nm(1)+' = '+Math.abs(n[0]-n[1])+' × '+fmt(u0)+' = '+fmt(Math.abs(n[0]-n[1])*u0));
+  }
+  out.alg='Biar 1 unit = <b>x</b>.<br>'+cand.map(c=>c.alg).join('<br>')+'<br><b>x = '+fmt(u0)+'</b>';
+  return out;
+}
+
+/* ---- Lukisan ---- */
+function drawBar(){
+  const qs=$('#bar-qshow');
+  if(BS.q.trim()){qs.hidden=false;qs.textContent=BS.q.trim();}else qs.hidden=true;
+  if(BS.mode==='pw')drawPW();else drawCMP();
+}
+function resBox(r){
+  const steps=r.steps.length?'<ol>'+r.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>':'';
+  const br=r.alg?'<div class="bridge"><b>Jambatan ke algebra</b><br>'+r.alg+'</div>':'';
+  return '<div class="res '+r.kind+'"><p class="verdict">'+esc(r.verdict)+'</p>'+steps+br+'</div>';
+}
+function drawPW(){
+  const r=solvePW(),given=BS.pw.parts.map(p=>num(p.v));
+  const vals=r.sP;
+  const pos=vals.filter(v=>v!=null&&!Number.isNaN(v)&&v>0);
+  const mean=pos.length?pos.reduce((a,b)=>a+b,0)/pos.length:1;
+  const wts=vals.map(v=>(v!=null&&!Number.isNaN(v)&&v>0)?v:mean);
+  const tot=wts.reduce((a,b)=>a+b,0);
+  let small=false;
+  const segs=BS.pw.parts.map((p,i)=>{
+    const v=vals[i],unk=v==null||Number.isNaN(v),calc=!unk&&given[i]===null;
+    if(wts[i]/tot<0.06)small=true;
+    const lab=(p.l||'').trim()||('Bahagian '+(i+1));
+    return '<div class="seg s'+(i%2)+(unk?' unk':'')+(calc?' calc':'')+'" style="flex:'+wts[i]+' 1 0%"><span class="sv">'+(unk?'?':esc(money(v)))+'</span><span class="sl">'+esc(lab)+'</span></div>';
+  }).join('');
+  const T=r.sT,tUnk=T==null||Number.isNaN(T),tCalc=!tUnk&&num(BS.pw.total)===null;
+  const sizes=BS.pw.parts.map((p,i)=>(p.l||('bahagian '+(i+1)))+' '+(vals[i]==null||Number.isNaN(vals[i])?'tidak diketahui':fmt(vals[i]))).join(', ');
+  $('#bar-vis').setAttribute('aria-label','Model bar bahagian-keseluruhan. Jumlah '+(tUnk?'tidak diketahui':fmt(T))+'. '+sizes);
+  $('#bar-vis').innerHTML='<div class="brace'+(tCalc?' calc':'')+'"><span>Jumlah = '+(tUnk?'?':esc(money(T)))+'</span></div><div class="track">'+segs+'</div>'+
+    '<p class="legend">Lebar bahagian berkadar dengan nilainya. Nilai berwarna jingga dikira oleh alat; ? = belum diketahui.'+(small?' Bahagian yang sangat kecil dilebarkan sedikit supaya boleh dibaca.':'')+'</p>';
+  $('#bar-res').innerHTML=resBox(r);
+}
+function drawCMP(){
+  const C=BS.cmp,r=solveCMP();
+  const maxU=Math.max.apply(null,C.bars.map(b=>b.n));
+  const show=maxU<=8;
+  const hi=Math.max(C.bars[0].n,C.bars[1]?C.bars[1].n:0),lo=Math.min(C.bars[0].n,C.bars[1]?C.bars[1].n:0);
+  const rows=C.bars.map((b,i)=>{
+    const given=num(b.v),v=r.vals[i],unk=v==null||Number.isNaN(v)||r.u==null&&given===null;
+    let cells='';
+    for(let k=0;k<b.n;k++){
+      const xtra=(i<2&&b.n===hi&&hi>lo&&k>=lo);
+      cells+='<div class="u b'+(i%4)+(k===b.n-1?' last':'')+(xtra?' xtra':'')+'" style="width:'+(100/maxU)+'%">'+(show?(r.u!=null?esc(fmt(r.u)):'1u'):'')+'</div>';
+    }
+    const valTxt=unk?'= ?':'= '+esc(money(v));
+    const calc=!unk&&given===null;
+    return '<div class="crow"><div class="cl">'+esc((b.l||'').trim()||('Bar '+(i+1)))+'</div><div class="ct">'+cells+'</div><div class="cr'+(unk?' unk':'')+(calc?' calc':'')+'">'+valTxt+'</div></div>';
+  }).join('');
+  const aria=C.bars.map(b=>(b.l||'bar')+' '+b.n+' unit').join(', ');
+  $('#bar-vis').setAttribute('aria-label','Model bar perbandingan: '+aria);
+  $('#bar-vis').innerHTML=rows+'<p class="legend">Semua unit sama saiz. 1u = satu unit. '+(hi>lo?'Bahagian bergaris putus-putus hijau kebiruan ialah beza antara dua bar pertama.':'')+'</p>';
+  $('#bar-res').innerHTML=resBox(r);
+}
+
+/* ---- Kawalan ---- */
+function buildBarControls(){
+  const c=$('#bar-ctl');
+  if(BS.mode==='pw'){
+    c.innerHTML='<div class="row"><label class="fld"><span>Jumlah (kosongkan jika ?)</span><input id="pw-total" inputmode="decimal" style="width:140px" placeholder="?"></label></div>'+
+      '<div id="pw-parts"></div><div class="row"><button class="btn" id="pw-add">+ Bahagian</button></div>'+
+      '<p class="hint">Setiap bahagian ada nama dan nilai. Kosongkan nilai untuk menandakannya sebagai ?. Alat boleh menyelesaikan satu nilai yang tidak diketahui.</p>';
+    $('#pw-total').value=BS.pw.total;
+    $('#pw-total').addEventListener('input',e=>{BS.pw.total=e.target.value;drawBar();});
+    $('#pw-add').addEventListener('click',()=>{if(BS.pw.parts.length<8){BS.pw.parts.push({l:'',v:''});buildParts();drawBar();}});
+    buildParts();
+  }else{
+    c.innerHTML='<div id="cmp-bars"></div><div class="row"><button class="btn" id="cmp-add">+ Bar</button></div>'+
+      '<div class="row"><label class="fld"><span>Jumlah semua bar</span><input id="cmp-sum" inputmode="decimal" style="width:130px" placeholder="tiada"></label>'+
+      '<label class="fld"><span id="cmp-diff-l">Beza dua bar pertama</span><input id="cmp-diff" inputmode="decimal" style="width:130px" placeholder="tiada"></label></div>'+
+      '<p class="hint">Tetapkan bilangan unit setiap bar (nisbah). Beri satu maklumat sahaja: nilai satu bar, jumlah semua, atau beza. Jika beri lebih daripada satu, alat menyemak kesepadanan.</p>';
+    $('#cmp-sum').value=BS.cmp.sum;$('#cmp-diff').value=BS.cmp.diff;
+    $('#cmp-sum').addEventListener('input',e=>{BS.cmp.sum=e.target.value;drawBar();});
+    $('#cmp-diff').addEventListener('input',e=>{BS.cmp.diff=e.target.value;drawBar();});
+    $('#cmp-add').addEventListener('click',()=>{if(BS.cmp.bars.length<4){BS.cmp.bars.push({l:'',n:1,v:''});buildBars();drawBar();}});
+    buildBars();
+  }
+}
+function buildParts(){
+  const box=$('#pw-parts');box.innerHTML='';
+  BS.pw.parts.forEach((p,i)=>{
+    const row=el('div','pr');
+    const l=el('input');l.placeholder='Nama bahagian';l.value=p.l;l.setAttribute('aria-label','Nama bahagian '+(i+1));
+    const v=el('input');v.placeholder='?';v.value=p.v;v.inputMode='decimal';v.setAttribute('aria-label','Nilai bahagian '+(i+1));
+    const x=el('button','btn sm dng','✕');x.setAttribute('aria-label','Buang bahagian '+(i+1));x.disabled=BS.pw.parts.length<=2;
+    l.addEventListener('input',()=>{p.l=l.value;drawBar();});
+    v.addEventListener('input',()=>{p.v=v.value;drawBar();});
+    x.addEventListener('click',()=>{BS.pw.parts.splice(i,1);buildParts();drawBar();});
+    row.append(l,v,x);box.appendChild(row);
+  });
+}
+function buildBars(){
+  const box=$('#cmp-bars');box.innerHTML='';
+  BS.cmp.bars.forEach((b,i)=>{
+    const row=el('div','cr2');
+    const l=el('input');l.placeholder='Nama bar';l.value=b.l;l.setAttribute('aria-label','Nama bar '+(i+1));
+    const st=el('div','step');
+    const mn=el('button','btn sm','−');mn.setAttribute('aria-label','Kurangkan unit bar '+(i+1));
+    const ct=el('b',null,String(b.n));
+    const pl=el('button','btn sm','+');pl.setAttribute('aria-label','Tambah unit bar '+(i+1));
+    st.append(mn,ct,pl);
+    const v=el('input');v.placeholder='nilai ?';v.value=b.v;v.inputMode='decimal';v.setAttribute('aria-label','Nilai bar '+(i+1));
+    const x=el('button','btn sm dng','✕');x.setAttribute('aria-label','Buang bar '+(i+1));x.disabled=BS.cmp.bars.length<=2;
+    l.addEventListener('input',()=>{b.l=l.value;$('#cmp-diff-l').textContent='Beza '+((BS.cmp.bars[0].l||'bar 1'))+' dan '+((BS.cmp.bars[1].l||'bar 2'));drawBar();});
+    mn.addEventListener('click',()=>{if(b.n>1){b.n--;ct.textContent=b.n;drawBar();}});
+    pl.addEventListener('click',()=>{if(b.n<12){b.n++;ct.textContent=b.n;drawBar();}});
+    v.addEventListener('input',()=>{b.v=v.value;drawBar();});
+    x.addEventListener('click',()=>{BS.cmp.bars.splice(i,1);buildBars();drawBar();});
+    row.append(l,st,v,x);box.appendChild(row);
+  });
+  const dl=$('#cmp-diff-l');if(dl)dl.textContent='Beza '+((BS.cmp.bars[0].l||'bar 1'))+' dan '+((BS.cmp.bars[1].l||'bar 2'));
+}
+function setBarMode(m){
+  BS.mode=m;
+  $$('#bar-modes .tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.m===m)));
+  buildBarControls();drawBar();
+}
+$$('#bar-modes .tab').forEach(b=>b.addEventListener('click',()=>setBarMode(b.dataset.m)));
+const sel=$('#bar-preset');
+sel.innerHTML='<option value="">Pilih contoh (buatan sendiri)</option>'+PRESETS.map((p,i)=>'<option value="'+i+'">'+esc(p.name)+'</option>').join('');
+sel.addEventListener('change',()=>{
+  if(sel.value==='')return;
+  const p=PRESETS[+sel.value];
+  BS.unit=p.unit;BS.q=p.q;
+  if(p.mode==='pw')BS.pw=JSON.parse(JSON.stringify(p.pw));else BS.cmp=JSON.parse(JSON.stringify(p.cmp));
+  $('#bar-unit').value=BS.unit;$('#bar-q').value=BS.q;
+  setBarMode(p.mode);
+});
+$('#bar-unit').value=BS.unit;
+$('#bar-unit').addEventListener('input',e=>{BS.unit=e.target.value;drawBar();});
+$('#bar-q').addEventListener('input',e=>{BS.q=e.target.value;drawBar();});
+buildBarControls();drawBar();
+
+/* =====================================================================
+   JUBIN ALGEBRA
+   ===================================================================== */
+const U=24,X=84;                       /* x bukan gandaan bulat unit (3.5 kali) */
+const dimsOf=(type,rot)=>type==='x2'?[X,X]:type==='x'?(rot?[U,X]:[X,U]):[U,U];
+const tname=t=>t==='x2'?'x²':t;
+const T={mode:'free',items:[],sel:null,z:1,seq:1,xval:2,auto:false,
+  ex:{a:2,b:3,c:1,d:-1,rev:null},
+  fa:{A:1,B:5,C:6,p:1,q:2,r:1,s:3,hint:''},
+  eq:null};
+let LW=600,LH=420,SC=1;
+const nodes=new Map();
+
+function tileEl(type,neg,w,h,cls){
+  const d=el('div','tile t-'+type+' '+(neg?'neg':'pos')+(cls?' '+cls:''));
+  d.style.width=w+'px';d.style.height=h+'px';
+  const fs=Math.max(10,Math.min(16,Math.min(w,h)*0.6));
+  d.style.fontSize=fs+'px';
+  d.innerHTML='<span class="lb">'+(neg?MIN:'')+tname(type)+'</span>';
+  d.setAttribute('aria-label',(neg?'Negatif ':'Positif ')+tname(type));
+  return d;
+}
+function polyOf(items){
+  const co=[0,0,0];
+  items.forEach(i=>{co[i.type==='x2'?0:i.type==='x'?1:2]+=i.neg?-1:1;});
+  return co;
+}
+function counts(items){
+  const c={x2:[0,0],x:[0,0],'1':[0,0]};
+  items.forEach(i=>c[i.type][i.neg?1:0]++);
+  return c;
+}
+function fitCanvas(){
+  const box=$('#cvbox');if(!box||box.offsetParent===null&&T.mode==='eq')return;
+  const avail=Math.max(260,box.clientWidth);
+  if(T.mode==='free'){
+    const sc0=avail>=560?1:0.85;let w=Math.round(avail/sc0),h=420;
+    T.items.forEach(it=>{const d=dim(it);w=Math.max(w,it.x+d[0]+16);h=Math.max(h,it.y+d[1]+16);});
+    LW=w;LH=h;SC=Math.min(sc0,avail/LW);
+  }else if(T.matDims){
+    LW=T.matDims.w;LH=T.matDims.h;SC=Math.min(1,avail/LW);
+  }
+  const cv=$('#cv'),inn=$('#cvin');
+  cv.style.width=(LW*SC)+'px';cv.style.height=(LH*SC)+'px';
+  inn.style.width=LW+'px';inn.style.height=LH+'px';inn.style.transform='scale('+SC+')';
+}
+window.addEventListener('resize',()=>{if($('#view-tiles').hidden)return;fitCanvas();if(T.mode==='free')T.items.forEach(it=>{clampTo(it);place(it);});});
+
+/* ---------- Mod Bebas ---------- */
+function dim(it){return dimsOf(it.type,it.rot);}
+function clampTo(it){const d=dim(it);it.x=Math.max(0,Math.min(it.x,LW-d[0]));it.y=Math.max(0,Math.min(it.y,LH-d[1]));}
+function place(it){
+  const n=nodes.get(it.id);if(!n)return;
+  const d=dim(it);
+  n.style.left=it.x+'px';n.style.top=it.y+'px';n.style.width=d[0]+'px';n.style.height=d[1]+'px';n.style.zIndex=it.z;
+  n.className='tile t-'+it.type+' '+(it.neg?'neg':'pos')+(T.sel===it.id?' sel':'')+(it._pair?' pair':'');
+  const lab=(it.neg?MIN:'')+tname(it.type);
+  if(n._lab!==lab){n.innerHTML='<span class="lb">'+lab+'</span>';n._lab=lab;}
+  n.style.fontSize=Math.max(10,Math.min(16,Math.min(d[0],d[1])*0.6))+'px';
+  n.setAttribute('aria-label',(it.neg?'Negatif ':'Positif ')+tname(it.type));
+}
+function mkNode(it){
+  const n=el('div','tile');n.tabIndex=0;n.setAttribute('role','img');
+  n.addEventListener('pointerdown',e=>{
+    if(e.button>0)return;
+    const now=Date.now();
+    if(it._t&&now-it._t<320){it._t=0;flipIt(it);select(it.id);return;}
+    it._t=now;select(it.id);
+    const r=$('#cv').getBoundingClientRect();
+    startDrag(it,(e.clientX-r.left)/SC-it.x,(e.clientY-r.top)/SC-it.y,false,e);
+  });
+  n.addEventListener('contextmenu',e=>{e.preventDefault();removeIt(it.id);});
+  n.addEventListener('focus',()=>{if(T.sel!==it.id)select(it.id);});
+  n.addEventListener('keydown',e=>{
+    const k=e.key;
+    if(k==='Delete'||k==='Backspace'){e.preventDefault();removeIt(it.id);}
+    else if(k==='f'||k==='F')flipIt(it);
+    else if((k==='r'||k==='R')&&it.type==='x')rotIt(it);
+    else if(k.indexOf('Arrow')===0){
+      e.preventDefault();const st=e.shiftKey?18:6;
+      it.x+=k==='ArrowRight'?st:k==='ArrowLeft'?-st:0;it.y+=k==='ArrowDown'?st:k==='ArrowUp'?-st:0;
+      clampTo(it);place(it);
+    }
+  });
+  nodes.set(it.id,n);$('#cvin').appendChild(n);place(it);return n;
+}
+function mkItem(type,neg){return {id:T.seq++,type:type,neg:!!neg,rot:0,x:0,y:0,z:++T.z};}
+function select(id){
+  T.sel=id;const it=T.items.find(i=>i.id===id);
+  if(it){it.z=++T.z;const n=nodes.get(id);if(n)n.style.zIndex=it.z;}
+  T.items.forEach(place);syncActions();
+}
+function flipIt(it){if(!it)return;it.neg=!it.neg;refreshFree();}
+function rotIt(it){if(!it||it.type!=='x')return;it.rot=it.rot?0:1;clampTo(it);refreshFree();}
+function removeQuiet(it){
+  const n=nodes.get(it.id);if(n){n.remove();nodes.delete(it.id);}
+  const i=T.items.indexOf(it);if(i>=0)T.items.splice(i,1);
+  if(T.sel===it.id)T.sel=null;
+}
+function removeIt(id){const it=T.items.find(i=>i.id===id);if(!it)return;removeQuiet(it);refreshFree();}
+function freeSpot(w,h,ex){
+  const g=8;
+  for(let y=g;y+h<=LH-g;y+=8)for(let x=g;x+w<=LW-g;x+=8){
+    let hit=false;
+    for(const o of T.items){if(o===ex)continue;const d=dim(o);
+      if(x<o.x+d[0]+g&&x+w+g>o.x&&y<o.y+d[1]+g&&y+h+g>o.y){hit=true;break;}}
+    if(!hit)return [x,y];
+  }
+  return [g+Math.random()*30,g+Math.random()*30];
+}
+function snapPos(it,x,y){
+  const d=dim(it),w=d[0],h=d[1],TH=9;
+  let bx=TH+1,by=TH+1,dx=0,dy=0,sx=false,sy=false;
+  T.items.forEach(o=>{
+    if(o===it)return;const od=dim(o);
+    const yNear=y<o.y+od[1]+30&&y+h>o.y-30,xNear=x<o.x+od[0]+30&&x+w>o.x-30;
+    if(yNear)[o.x+od[0]-x,o.x-(x+w),o.x-x,o.x+od[0]-(x+w)].forEach(v=>{if(Math.abs(v)<bx){bx=Math.abs(v);dx=v;sx=true;}});
+    if(xNear)[o.y+od[1]-y,o.y-(y+h),o.y-y,o.y+od[1]-(y+h)].forEach(v=>{if(Math.abs(v)<by){by=Math.abs(v);dy=v;sy=true;}});
+  });
+  x=sx&&bx<=TH?x+dx:Math.round(x/6)*6;
+  y=sy&&by<=TH?y+dy:Math.round(y/6)*6;
+  return [Math.max(0,Math.min(x,LW-w)),Math.max(0,Math.min(y,LH-h))];
+}
+function tryAutoCancel(it){
+  if(!T.auto)return false;
+  const d=dim(it);
+  for(const o of T.items){
+    if(o===it||o.type!==it.type||o.neg===it.neg||o.rot!==it.rot)continue;
+    const ix=Math.max(0,Math.min(it.x+d[0],o.x+d[0])-Math.max(it.x,o.x)),iy=Math.max(0,Math.min(it.y+d[1],o.y+d[1])-Math.max(it.y,o.y));
+    if(ix*iy>=0.7*d[0]*d[1]){removeQuiet(it);removeQuiet(o);return true;}
+  }
+  return false;
+}
+function startDrag(it,ox,oy,fromPal,e0){
+  const cv=$('#cv');
+  const mv=ev=>{const r=cv.getBoundingClientRect();const p=snapPos(it,(ev.clientX-r.left)/SC-ox,(ev.clientY-r.top)/SC-oy);it.x=p[0];it.y=p[1];place(it);};
+  const up=ev=>{
+    document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',up);
+    if(fromPal){const r=cv.getBoundingClientRect();if(ev.clientX<r.left||ev.clientX>r.right||ev.clientY<r.top||ev.clientY>r.bottom){removeQuiet(it);refreshFree();return;}}
+    tryAutoCancel(it);refreshFree();
+  };
+  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up);
+  mv(e0);
+}
+function addTile(type,neg){
+  if(T.items.length>=150)return null;
+  const it=mkItem(type,neg),d=dim(it),s=freeSpot(d[0],d[1],it);
+  it.x=s[0];it.y=s[1];T.items.push(it);mkNode(it);select(it.id);refreshFree();return it;
+}
+function buildPalette(){
+  const pal=$('#tl-pal');pal.innerHTML='';
+  [['x2',0],['x',0],['1',0],['x2',1],['x',1],['1',1]].forEach(a=>{
+    const type=a[0],neg=!!a[1],b=el('button','chip');b.type='button';
+    const d=dimsOf(type,0),k=0.5;
+    const sw=el('span','sw');sw.style.width=(d[0]*k)+'px';sw.style.height=(d[1]*k)+'px';
+    const t=tileEl(type,neg,d[0]*k,d[1]*k,'inl flat');t.style.fontSize='10px';sw.appendChild(t);
+    b.append(sw,el('span',null,(neg?MIN:'+')+tname(type)));
+    b.setAttribute('aria-label','Tambah jubin '+(neg?'negatif ':'positif ')+tname(type));
+    b.addEventListener('pointerdown',e=>{
+      if(e.button>0)return;
+      const sx=e.clientX,sy=e.clientY;
+      const mv=ev=>{
+        if(Math.hypot(ev.clientX-sx,ev.clientY-sy)>7){
+          cleanup();
+          if(T.items.length>=150)return;
+          const it=mkItem(type,neg);T.items.push(it);mkNode(it);select(it.id);const dd=dim(it);
+          startDrag(it,dd[0]/2,dd[1]/2,true,ev);
+        }
+      };
+      const up=()=>{cleanup();addTile(type,neg);};
+      const cleanup=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cleanup);};
+      document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);document.addEventListener('pointercancel',cleanup);
+    });
+    b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();addTile(type,neg);}});
+    pal.appendChild(b);
+  });
+}
+function markPairs(){
+  T.items.forEach(i=>{i._pair=false;});
+  ['x2','x','1'].forEach(t=>{
+    const p=T.items.filter(i=>i.type===t&&!i.neg),n=T.items.filter(i=>i.type===t&&i.neg);
+    const m=Math.min(p.length,n.length);
+    for(let k=0;k<m;k++){p[k]._pair=true;n[k]._pair=true;}
+  });
+}
+function cancelPairsFree(){
+  ['x2','x','1'].forEach(t=>{
+    const p=T.items.filter(i=>i.type===t&&!i.neg),n=T.items.filter(i=>i.type===t&&i.neg);
+    const m=Math.min(p.length,n.length);
+    for(let k=0;k<m;k++){removeQuiet(p[k]);removeQuiet(n[k]);}
+  });
+  T.sel=null;refreshFree();
+}
+function refreshFree(){
+  markPairs();T.items.forEach(place);
+  const co=polyOf(T.items),c=counts(T.items);
+  $('#tl-big').innerHTML=esc(poly(co));
+  const pairs=['x2','x','1'].map(t=>[t,Math.min(c[t][0],c[t][1])]).filter(a=>a[1]>0);
+  $('#tl-lines').innerHTML=[['Jubin x²',c.x2[0]+' positif, '+c.x2[1]+' negatif'],['Jubin x',c.x[0]+' positif, '+c.x[1]+' negatif'],['Jubin 1',c['1'][0]+' positif, '+c['1'][1]+' negatif'],['Jumlah jubin',T.items.length]]
+    .map(l=>'<div><dt>'+l[0]+'</dt><dd>'+l[1]+'</dd></div>').join('');
+  const nt=$('#tl-note');nt.className='note';
+  nt.innerHTML=pairs.length?'Pasangan sifar: '+pairs.map(a=>a[1]+' pasang '+tname(a[0])).join(', ')+'. Setiap pasangan bernilai 0 dan boleh dibuang (ditanda garis putus-putus).':'';
+  const xv=T.xval,val=co[0]*xv*xv+co[1]*xv+co[2];
+  const ev=$('#tl-eval');if(ev)ev.innerHTML='Apabila x = '+esc(fmt(xv))+', nilai ungkapan = <b>'+esc(fmt(val))+'</b>';
+  syncActions();
+}
+function syncActions(){
+  if(T.mode!=='free')return;
+  const it=T.items.find(i=>i.id===T.sel);
+  const set=(id,dis)=>{const b=$('#'+id);if(b)b.disabled=dis;};
+  set('a-flip',!it);set('a-rot',!it||it.type!=='x');set('a-dup',!it);set('a-del',!it);
+}
+function buildFreeUI(){
+  $('#tl-ptitle').textContent='Ungkapan daripada jubin';
+  $('#tl-ctl').innerHTML='<label class="fld" style="margin-bottom:12px;max-width:260px"><span>Nilai x untuk semakan</span><input id="tl-xv" type="number" step="any" value="'+T.xval+'"></label>';
+  $('#tl-xv').addEventListener('input',e=>{const v=parseFloat(e.target.value);T.xval=Number.isNaN(v)?0:v;refreshFree();});
+  $('#tl-pal').hidden=false;buildPalette();
+  const a=$('#tl-actions');
+  a.innerHTML='<div id="tl-eval" class="note wide" style="grid-column:1/-1;margin:0"></div>'+
+    '<button class="btn pri wide" id="a-cancel">Buang pasangan sifar</button>'+
+    '<button class="btn" id="a-flip">Tukar tanda</button><button class="btn" id="a-rot">Putar 90°</button>'+
+    '<button class="btn" id="a-dup">Salin</button><button class="btn dng" id="a-del">Padam</button>'+
+    '<button class="btn wide" id="a-auto" aria-pressed="'+T.auto+'">Batal automatik apabila tindih: '+(T.auto?'hidup':'mati')+'</button>'+
+    '<button class="btn dng wide" id="a-clear">Kosongkan semua</button>';
+  $('#a-cancel').onclick=cancelPairsFree;
+  $('#a-flip').onclick=()=>flipIt(T.items.find(i=>i.id===T.sel));
+  $('#a-rot').onclick=()=>rotIt(T.items.find(i=>i.id===T.sel));
+  $('#a-dup').onclick=()=>{const it=T.items.find(i=>i.id===T.sel);if(!it||T.items.length>=150)return;const c=mkItem(it.type,it.neg);c.rot=it.rot;c.x=it.x+16;c.y=it.y+16;clampTo(c);T.items.push(c);mkNode(c);select(c.id);refreshFree();};
+  $('#a-del').onclick=()=>removeIt(T.sel);
+  $('#a-auto').onclick=e=>{T.auto=!T.auto;e.currentTarget.setAttribute('aria-pressed',String(T.auto));e.currentTarget.textContent='Batal automatik apabila tindih: '+(T.auto?'hidup':'mati');};
+  let armed=0;
+  $('#a-clear').onclick=e=>{
+    const b=e.currentTarget;
+    if(armed){clearTimeout(armed);armed=0;b.textContent='Kosongkan semua';T.items.slice().forEach(removeQuiet);T.sel=null;refreshFree();}
+    else{b.textContent='Klik sekali lagi untuk sahkan';armed=setTimeout(()=>{armed=0;b.textContent='Kosongkan semua';},3000);}
+  };
+  $('#tl-hint').textContent='Ketik jubin pada palet untuk menambah, atau seret terus ke kanvas. Seret jubin supaya tepinya melekat. Ketik dua kali untuk tukar tanda. Papan kekunci: F tukar tanda, R putar, Delete padam, anak panah gerak.';
+  const cv=$('#cv');cv.onpointerdown=e=>{if(e.target===cv||e.target===$('#cvin')){T.sel=null;T.items.forEach(place);syncActions();}};
+  $('#cvin').innerHTML='';nodes.clear();
+  if(!T.items.length){
+    [['x2'],['x'],['x'],['x',1],['1'],['1'],['1']].forEach(a=>{const it=mkItem(a[0],a[1]);T.items.push(it);});
+    fitCanvas();
+    let x=12,y=12,rowH=0;
+    T.items.forEach(it=>{const d=dim(it);if(x+d[0]>LW-12&&x>12){x=12;y+=rowH+10;rowH=0;}it.x=x;it.y=y;x+=d[0]+10;rowH=Math.max(rowH,d[1]);});
+  }
+  fitCanvas();T.items.forEach(it=>{clampTo(it);mkNode(it);});
+  refreshFree();
+}
+
+/* ---------- Mod Pengembangan dan Pemfaktoran: peta luas ---------- */
+function matLayout(a,b,c,d){
+  const cols=[],rows=[];let cx=0,cy=0;
+  const addC=(n,type,sg)=>{for(let i=0;i<n;i++){const w=type==='x'?X:U;cols.push({type:type,sg:sg,x:cx,w:w});cx+=w;}};
+  const addR=(n,type,sg)=>{for(let i=0;i<n;i++){const h=type==='x'?X:U;rows.push({type:type,sg:sg,y:cy,h:h});cy+=h;}};
+  addC(Math.abs(a),'x',Math.sign(a));addC(Math.abs(b),'1',Math.sign(b));
+  addR(Math.abs(c),'x',Math.sign(c));addR(Math.abs(d),'1',Math.sign(d));
+  const cells=[];
+  rows.forEach(r=>cols.forEach(cc=>{
+    const type=(cc.type==='x'&&r.type==='x')?'x2':(cc.type==='1'&&r.type==='1')?'1':'x';
+    cells.push({type:type,neg:cc.sg*r.sg<0,rot:(type==='x'&&cc.type==='1')?1:0,x:cc.x,y:r.y,w:cc.w,h:r.h});
+  }));
+  return {cols:cols,rows:rows,cells:cells,W:cx,H:cy};
+}
+function drawMat(a,b,c,d,reveal,lab1,lab2){
+  const L=matLayout(a,b,c,d),OX=84,OY=64;
+  const inn=$('#cvin');inn.innerHTML='';nodes.clear();
+  if(!L.cols.length||!L.rows.length){
+    T.matDims={w:360,h:140};fitCanvas();
+    inn.innerHTML='<div style="padding:24px;font-weight:700">Isi sekurang-kurangnya satu sebutan bukan sifar bagi setiap faktor.</div>';
+    return L;
+  }
+  T.matDims={w:Math.max(OX+L.W+14,320),h:OY+L.H+14};fitCanvas();
+  const f1=el('div','flab',esc(lab1));f1.style.left=OX+'px';f1.style.top='0px';f1.style.width=L.W+'px';f1.style.textAlign='center';inn.appendChild(f1);
+  const f2=el('div','flab',esc(lab2));f2.style.left='6px';f2.style.top=(OY+L.H/2)+'px';f2.style.writingMode='vertical-rl';f2.style.transform='translateY(-50%) rotate(180deg)';inn.appendChild(f2);
+  L.cols.forEach(cc=>{
+    const h=tileEl(cc.type,cc.sg<0,cc.w,22,'flat');h.style.left=(OX+cc.x)+'px';h.style.top=(OY-28)+'px';h.style.borderRadius='3px';inn.appendChild(h);
+    h.firstChild.textContent=(cc.sg<0?MIN:'')+(cc.type==='x'?'x':'1');
+  });
+  L.rows.forEach(r=>{
+    const h=tileEl(r.type,r.sg<0,26,r.h,'flat');h.style.left=(OX-32)+'px';h.style.top=(OY+r.y)+'px';inn.appendChild(h);
+    h.firstChild.textContent=(r.sg<0?MIN:'')+(r.type==='x'?'x':'1');
+  });
+  L.cells.forEach((cl,i)=>{
+    if(i<reveal){
+      const t=tileEl(cl.type,cl.neg,cl.w,cl.h,'flat');t.style.left=(OX+cl.x)+'px';t.style.top=(OY+cl.y)+'px';inn.appendChild(t);
+    }else{
+      const p=el('div','ph');p.style.left=(OX+cl.x)+'px';p.style.top=(OY+cl.y)+'px';p.style.width=cl.w+'px';p.style.height=cl.h+'px';inn.appendChild(p);
+    }
+  });
+  return L;
+}
+function matSummary(L,reveal){
+  const cells=L.cells.slice(0,reveal);
+  const c={x2:[0,0],x:[0,0],'1':[0,0]};cells.forEach(cl=>c[cl.type][cl.neg?1:0]++);
+  return c;
+}
+function numField(id,val,lo,hi,label){
+  return '<label>'+label+'<input id="'+id+'" type="number" min="'+lo+'" max="'+hi+'" step="1" value="'+val+'"></label>';
+}
+function bindNum(id,fn,lo,hi){
+  const e=$('#'+id);
+  e.addEventListener('input',()=>{ if(e.value===''||e.value==='-')return; fn(clampInt(e.value,lo,hi)); });
+  e.addEventListener('change',()=>{e.value=clampInt(e.value,lo,hi);fn(clampInt(e.value,lo,hi));});
+}
+
+function buildExpandUI(){
+  $('#tl-ptitle').textContent='Hasil pengembangan';
+  $('#tl-pal').hidden=true;
+  const E=T.ex;
+  $('#tl-ctl').innerHTML=
+    '<div class="fx"><span class="hd"><b>Faktor 1</b><span class="res-t" id="e-f1"></span></span>'+numField('e-a',E.a,-3,3,'pekali x')+numField('e-b',E.b,-9,9,'pemalar')+'</div>'+
+    '<div class="fx"><span class="hd"><b>Faktor 2</b><span class="res-t" id="e-f2"></span></span>'+numField('e-c',E.c,-3,3,'pekali x')+numField('e-d',E.d,-9,9,'pemalar')+'</div>';
+  [['e-a','a',-3,3],['e-b','b',-9,9],['e-c','c',-3,3],['e-d','d',-9,9]].forEach(a=>bindNum(a[0],v=>{E[a[1]]=v;E.rev=null;drawExpand();},a[2],a[3]));
+  const a=$('#tl-actions');
+  a.innerHTML='<button class="btn pri" id="x-all">Isi semua petak</button><button class="btn" id="x-step">Isi satu petak</button>'+
+    '<button class="btn" id="x-reset">Kosongkan petak</button><button class="btn" id="x-send">Hantar ke mod Bebas</button>';
+  $('#x-all').onclick=()=>{E.rev=null;drawExpand();};
+  $('#x-step').onclick=()=>{const L=matLayout(E.a,E.b,E.c,E.d);E.rev=Math.min(L.cells.length,(E.rev==null?L.cells.length:E.rev)+1);drawExpand();};
+  $('#x-reset').onclick=()=>{E.rev=0;drawExpand();};
+  $('#x-send').onclick=()=>sendToFree(matLayout(E.a,E.b,E.c,E.d),E.rev);
+  $('#tl-hint').textContent='Panjang sisi petak ialah faktor. Setiap petak ialah hasil darab satu lajur dan satu baris. Gunakan "Isi satu petak" untuk menunjukkan langkah demi langkah, kemudian "Hantar ke mod Bebas" untuk membuang pasangan sifar.';
+  drawExpand();
+}
+function drawExpand(){
+  const E=T.ex,L0=matLayout(E.a,E.b,E.c,E.d),reveal=E.rev==null?L0.cells.length:E.rev;
+  const l1='('+lin(E.a,E.b)+')',l2='('+lin(E.c,E.d)+')';
+  $('#e-f1').textContent=l1;$('#e-f2').textContent=l2;
+  const L=drawMat(E.a,E.b,E.c,E.d,reveal,l1,l2);
+  const co=[E.a*E.c,E.a*E.d+E.b*E.c,E.b*E.d];
+  const c=matSummary(L,reveal);
+  const full=reveal>=L.cells.length;
+  $('#tl-big').innerHTML=full?esc(poly(co)):'<span class="muted">Lengkapkan petak</span>';
+  $('#tl-lines').innerHTML=[
+    ['x²',c.x2[0]+' positif, '+c.x2[1]+' negatif'],['x',c.x[0]+' positif, '+c.x[1]+' negatif'],['1',c['1'][0]+' positif, '+c['1'][1]+' negatif'],
+    ['Petak diisi',Math.min(reveal,L.cells.length)+' / '+L.cells.length]].map(l=>'<div><dt>'+l[0]+'</dt><dd>'+l[1]+'</dd></div>').join('');
+  const pr=['x²','x','1'].map((s,i)=>[s,[c.x2,c.x,c['1']][i]]).filter(a=>a[1][0]&&a[1][1]);
+  const nt=$('#tl-note');nt.className='note';
+  nt.innerHTML=(full?'<b>'+esc(l1+l2)+' = '+esc(poly(co))+'</b>':'')+
+    (pr.length&&full?'<br>Ada pasangan sifar: '+pr.map(a=>Math.min(a[1][0],a[1][1])+' pasang '+a[0]).join(', ')+'. Gabungkan sebutan serupa untuk mendapat jawapan ringkas.':'');
+  fitCanvas();
+}
+function sendToFree(L,reveal){
+  const cells=L.cells.slice(0,reveal==null?L.cells.length:reveal);
+  T.items=[];T.sel=null;
+  cells.forEach(cl=>{const it=mkItem(cl.type,cl.neg);it.rot=cl.rot;it.x=cl.x+10;it.y=cl.y+10;T.items.push(it);});
+  setTileMode('free');
+}
+
+function factorSolve(A,B,C){
+  for(let p=1;p<=3;p++){
+    if(A%p)continue;const r=A/p;
+    for(let q=-12;q<=12;q++)for(let s=-12;s<=12;s++){
+      if(q*s===C&&p*s+q*r===B)return {p:p,q:q,r:r,s:s};
+    }
+  }
+  return null;
+}
+function buildFactorUI(){
+  $('#tl-ptitle').textContent='Semakan';
+  $('#tl-pal').hidden=true;
+  const F=T.fa;
+  $('#tl-ctl').innerHTML=
+    '<div class="fx"><span class="hd"><b>Sasaran</b><span class="res-t" id="f-tg"></span></span>'+numField('f-A',F.A,1,3,'x²')+numField('f-B',F.B,-12,12,'x')+numField('f-C',F.C,-12,12,'1')+'</div>'+
+    '<div class="tilebar" id="f-tiles" aria-label="Jubin sasaran"></div>'+
+    '<div class="fx"><span class="hd"><b>Faktor 1</b><span class="res-t" id="f-f1"></span></span>'+numField('f-p',F.p,-3,3,'pekali x')+numField('f-q',F.q,-12,12,'pemalar')+'</div>'+
+    '<div class="fx"><span class="hd"><b>Faktor 2</b><span class="res-t" id="f-f2"></span></span>'+numField('f-r',F.r,-3,3,'pekali x')+numField('f-s',F.s,-12,12,'pemalar')+'</div>';
+  [['f-A','A',1,3],['f-B','B',-12,12],['f-C','C',-12,12],['f-p','p',-3,3],['f-q','q',-12,12],['f-r','r',-3,3],['f-s','s',-12,12]]
+    .forEach(a=>bindNum(a[0],v=>{F[a[1]]=v;F.hint='';drawFactor();},a[2],a[3]));
+  $('#tl-actions').innerHTML='<button class="btn" id="f-hint">Petunjuk</button><button class="btn pri" id="f-ans">Tunjuk jawapan</button>'+
+    '<button class="btn wide" id="f-send">Hantar ke mod Bebas</button>';
+  $('#f-hint').onclick=()=>{
+    const m=F.A*F.C;
+    const pairs=[];
+    for(let i=-Math.abs(m)||0;i<=Math.abs(m);i++){if(i!==0&&m%i===0){const j=m/i;if(i<=j)pairs.push([i,j]);}}
+    const good=pairs.filter(a=>a[0]+a[1]===F.B);
+    F.hint='Cari dua nombor yang hasil darabnya '+fmt(m)+' (x² × pemalar) dan hasil tambahnya '+fmt(F.B)+'. '+
+      (good.length?'Pasangan itu ialah '+fmt(good[0][0])+' dan '+fmt(good[0][1])+'. Gunakannya untuk memecahkan sebutan x, kemudian susun petak.':'Tiada pasangan integer sepadan, jadi mungkin tidak boleh difaktorkan dengan integer.');
+    drawFactor();
+  };
+  $('#f-ans').onclick=()=>{
+    const s=factorSolve(F.A,F.B,F.C);
+    if(!s){F.hint='Tiada faktor integer bagi ungkapan ini dalam julat alat (tidak boleh difaktorkan).';}
+    else{F.p=s.p;F.q=s.q;F.r=s.r;F.s=s.s;F.hint='';['p','q','r','s'].forEach(k=>{$('#f-'+k).value=F[k];});}
+    drawFactor();
+  };
+  $('#f-send').onclick=()=>sendToFree(matLayout(F.p,F.q,F.r,F.s),null);
+  $('#tl-hint').textContent='Susun jubin sasaran menjadi segi empat tepat. Panjang dan lebar segi empat ialah faktor. Cuba nilai faktor; apabila hasil darab sama dengan sasaran, anda telah menemui faktor yang betul.';
+  drawFactor();
+}
+function drawFactor(){
+  const F=T.fa;
+  const tgt=[F.A,F.B,F.C],prod=[F.p*F.r,F.p*F.s+F.q*F.r,F.q*F.s];
+  $('#f-tg').textContent=poly(tgt);
+  $('#f-f1').textContent='('+lin(F.p,F.q)+')';$('#f-f2').textContent='('+lin(F.r,F.s)+')';
+  const tb=$('#f-tiles');tb.innerHTML='';
+  const addT=(type,neg,n)=>{for(let i=0;i<Math.min(n,40);i++){const d=dimsOf(type,0);tb.appendChild(tileEl(type,neg,d[0]*0.45,d[1]*0.45,'inl flat'));}};
+  [['x2',F.A],['x',F.B],['1',F.C]].forEach(a=>addT(a[0],a[1]<0,Math.abs(a[1])));
+  const L=drawMat(F.p,F.q,F.r,F.s,Infinity,'('+lin(F.p,F.q)+')','('+lin(F.r,F.s)+')');
+  const same=prod[0]===tgt[0]&&prod[1]===tgt[1]&&prod[2]===tgt[2];
+  $('#tl-big').innerHTML=esc(poly(prod));
+  const c=matSummary(L,L.cells.length);
+  $('#tl-lines').innerHTML=[['Hasil darab anda',poly(prod)],['Sasaran',poly(tgt)],['x² positif / negatif',c.x2[0]+' / '+c.x2[1]],['x positif / negatif',c.x[0]+' / '+c.x[1]],['1 positif / negatif',c['1'][0]+' / '+c['1'][1]]]
+    .map(l=>'<div><dt>'+l[0]+'</dt><dd>'+esc(String(l[1]))+'</dd></div>').join('');
+  const nt=$('#tl-note');
+  if(same){nt.className='note ok';nt.innerHTML='<b>Betul.</b> ('+esc(lin(F.p,F.q))+')('+esc(lin(F.r,F.s))+') = '+esc(poly(tgt))+'. Segi empat tepat ini ialah faktor bagi sasaran.'+(F.hint?'<br>'+esc(F.hint):'');}
+  else{
+    const diff=[prod[0]-tgt[0],prod[1]-tgt[1],prod[2]-tgt[2]];
+    nt.className='note err';
+    nt.innerHTML='Belum sepadan. Beza daripada sasaran: <b>'+esc(poly(diff))+'</b>.'+(F.hint?'<br>'+esc(F.hint):'');
+  }
+  fitCanvas();
+}
+
+/* ---------- Mod Persamaan ---------- */
+const EQP=[
+  {n:'x + 3 = 7',L:[1,3],R:[0,7]},
+  {n:'2x + 3 = 11',L:[2,3],R:[0,11]},
+  {n:'3x + 2 = x + 8',L:[3,2],R:[1,8]},
+  {n:'5 − x = 2',L:[-1,5],R:[0,2]},
+  {n:'4x − 6 = 2x + 4',L:[4,-6],R:[2,4]},
+  {n:'x − 4 = −6',L:[1,-4],R:[0,-6]}
+];
+function mkSide(a,b){return {xp:Math.max(a,0),xn:Math.max(-a,0),cp:Math.max(b,0),cn:Math.max(-b,0)};}
+const net=s=>({a:s.xp-s.xn,b:s.cp-s.cn});
+function sideStr(s){const n=net(s);return lin(n.a,n.b);}
+function eqStr(){return sideStr(T.eq.L)+' = '+sideStr(T.eq.R);}
+function hasPairs(){const E=T.eq;return [E.L,E.R].some(s=>(s.xp&&s.xn)||(s.cp&&s.cn));}
+function cancelSide(s){const m=Math.min(s.xp,s.xn);s.xp-=m;s.xn-=m;const k=Math.min(s.cp,s.cn);s.cp-=k;s.cn-=k;}
+function eqSnap(){return JSON.stringify({L:T.eq.L,R:T.eq.R,log:T.eq.log});}
+function eqPush(){T.eq.undo.push(eqSnap());if(T.eq.undo.length>60)T.eq.undo.shift();}
+function eqLog(desc){T.eq.log.push({d:desc,e:eqStr()});}
+function loadEq(L,R){
+  T.eq={L:mkSide(L[0],L[1]),R:mkSide(R[0],R[1]),log:[],undo:[],orig:{L:L,R:R},hint:'',idx:0};
+  T.eq.log.push({d:'Persamaan asal',e:eqStr()});
+}
+function buildEqUI(){
+  if(!T.eq)loadEq(EQP[2].L,EQP[2].R);
+  const card=$('#eq-card');
+  card.innerHTML=
+   '<div class="row"><label class="fld"><span>Contoh persamaan</span><select id="eq-pre" style="min-width:200px"></select></label>'+
+   '<label class="fld"><span>Atau taip: ax + b = cx + d</span><span class="fx" style="margin:0">'+
+   '<input id="eq-a" type="number" step="1" min="-6" max="6" value="3" aria-label="a"> x + <input id="eq-b" type="number" step="1" min="-12" max="12" value="2" aria-label="b"> = '+
+   '<input id="eq-c" type="number" step="1" min="-6" max="6" value="1" aria-label="c"> x + <input id="eq-d" type="number" step="1" min="-12" max="12" value="8" aria-label="d"></span></label>'+
+   '<button class="btn pri" id="eq-load">Muat</button></div>'+
+   '<div class="eq-big" id="eq-big" aria-live="polite"></div>'+
+   '<div class="eq-pans"><div class="pan"><h3>Belah kiri</h3><div class="pan-t" id="pan-l"></div></div><div class="eq-sign">=</div><div class="pan"><h3>Belah kanan</h3><div class="pan-t" id="pan-r"></div></div></div>'+
+   '<div class="eq-ops"><div class="grp"><span class="gl">Tambah pada kedua-dua belah:</span>'+
+   '<label class="fx" style="margin:0"><span>bilangan</span><input id="eq-n" type="number" min="1" max="12" value="1"></label>'+
+   '<button class="btn" data-op="c1">+ 1</button><button class="btn" data-op="c-1">'+MIN+' 1</button><button class="btn" data-op="x1">+ x</button><button class="btn" data-op="x-1">'+MIN+' x</button></div></div>'+
+   '<div class="eq-ops"><button class="btn pri" id="eq-zero">Buang pasangan sifar</button><div class="grp" id="eq-div"></div>'+
+   '<button class="btn" id="eq-neg">Darab dengan '+MIN+'1</button><button class="btn" id="eq-swap">Tukar belah</button></div>'+
+   '<div class="eq-ops"><button class="btn" id="eq-hint">Petunjuk</button><button class="btn" id="eq-undo">Undur</button><button class="btn dng" id="eq-reset">Mula semula</button>'+
+   '<label class="fx" style="margin:0;gap:8px"><input type="checkbox" id="eq-auto"><span>Ringkas pasangan sifar secara automatik</span></label></div>'+
+   '<div class="note" id="eq-note"></div><ol class="log" id="eq-log"></ol>';
+  const pre=$('#eq-pre');pre.innerHTML=EQP.map((p,i)=>'<option value="'+i+'">'+esc(p.n)+'</option>').join('');
+  pre.value=String(T.eq.idx);
+  pre.onchange=()=>{const p=EQP[+pre.value];T.eq.idx=+pre.value;loadEq(p.L,p.R);T.eq.idx=+pre.value;drawEq();};
+  $('#eq-load').onclick=()=>{
+    const v=id=>clampInt($('#'+id).value,id==='eq-a'||id==='eq-c'?-6:-12,id==='eq-a'||id==='eq-c'?6:12);
+    loadEq([v('eq-a'),v('eq-b')],[v('eq-c'),v('eq-d')]);drawEq();
+  };
+  card.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{
+    const n=clampInt($('#eq-n').value,1,12);const op=b.dataset.op;const t=op[0],sg=op.slice(1)==='-1'?-1:1;
+    eqPush();
+    [T.eq.L,T.eq.R].forEach(s=>{
+      if(t==='c'){if(sg>0)s.cp+=n;else s.cn+=n;}else{if(sg>0)s.xp+=n;else s.xn+=n;}
+    });
+    const txt=(sg>0?'Tambah ':'Tolak ')+(t==='x'?(n===1?'x':n+'x'):String(n))+' pada kedua-dua belah';
+    if($('#eq-auto').checked){[T.eq.L,T.eq.R].forEach(cancelSide);eqLog(txt+' dan ringkaskan');}
+    else eqLog(txt+' (belum diringkaskan)');
+    drawEq();
+  });
+  $('#eq-zero').onclick=()=>{if(!hasPairs())return;eqPush();[T.eq.L,T.eq.R].forEach(cancelSide);eqLog('Buang pasangan sifar');drawEq();};
+  $('#eq-neg').onclick=()=>{eqPush();[T.eq.L,T.eq.R].forEach(s=>{let t=s.xp;s.xp=s.xn;s.xn=t;t=s.cp;s.cp=s.cn;s.cn=t;});eqLog('Darab kedua-dua belah dengan '+MIN+'1');drawEq();};
+  $('#eq-swap').onclick=()=>{eqPush();const t=T.eq.L;T.eq.L=T.eq.R;T.eq.R=t;eqLog('Tukar belah kiri dan kanan');drawEq();};
+  $('#eq-undo').onclick=()=>{if(!T.eq.undo.length)return;const s=JSON.parse(T.eq.undo.pop());T.eq.L=s.L;T.eq.R=s.R;T.eq.log=s.log;drawEq();};
+  $('#eq-reset').onclick=()=>{loadEq(T.eq.orig.L,T.eq.orig.R);drawEq();};
+  $('#eq-hint').onclick=()=>{T.eq.hint=eqHint();drawEq(true);};
+  drawEq();
+}
+function divisors(){
+  const E=T.eq,v=[E.L.xp,E.L.cp,E.R.xp,E.R.cp,E.L.xn,E.L.cn,E.R.xn,E.R.cn];
+  let g=0;v.forEach(n=>{g=gcd(g,n);});
+  const out=[];for(let k=2;k<=g&&k<=12;k++)if(g%k===0)out.push(k);return out;
+}
+function eqSolved(){
+  const E=T.eq;if(hasPairs())return null;
+  const l=net(E.L),r=net(E.R);
+  if(l.a===1&&l.b===0&&r.a===0)return r.b;
+  if(r.a===1&&r.b===0&&l.a===0)return l.b;
+  return null;
+}
+function eqHint(){
+  const E=T.eq;
+  if(hasPairs())return 'Ada pasangan sifar pada satu belah. Buang pasangan sifar dahulu.';
+  const l=net(E.L),r=net(E.R);
+  if(eqSolved()!=null)return 'Anda sudah menemui x. Semak jawapan dengan menggantikan semula dalam persamaan asal.';
+  if(l.a===0&&r.a!==0)return 'Pindahkan x ke belah kiri: tekan "Tukar belah" supaya x berada di sebelah kiri.';
+  if(l.a!==0&&r.a!==0){const k=-r.a;return 'x ada di kedua-dua belah. '+(k>0?'Tambah ':'Tolak ')+(Math.abs(k)===1?'x':Math.abs(k)+'x')+' pada kedua-dua belah supaya x tinggal di belah kiri sahaja.';}
+  if(l.b!==0){const k=-l.b;return 'Asingkan x: '+(k>0?'tambah ':'tolak ')+Math.abs(k)+' pada kedua-dua belah untuk menghapuskan '+(l.b>0?'':MIN)+Math.abs(l.b)+' di belah kiri.';}
+  if(l.a===-1)return 'x bernilai negatif. Darab kedua-dua belah dengan '+MIN+'1.';
+  if(l.a>1){
+    if(r.b%l.a===0)return 'Bahagi kedua-dua belah dengan '+l.a+'.';
+    return 'Jawapan ialah pecahan ('+fmt(r.b)+'/'+l.a+'). Jubin hanya boleh dibahagi tepat, jadi teruskan secara simbol.';
+  }
+  if(l.a<-1){
+    if(r.b%l.a===0)return 'Bahagi kedua-dua belah dengan '+l.a+' (atau darab '+MIN+'1 dahulu).';
+    return 'Jawapan ialah pecahan. Teruskan secara simbol.';
+  }
+  return 'Persamaan ini tiada x di belah kiri. Semak sama ada kedua-dua belah sama.';
+}
+function panelTiles(s,box){
+  box.innerHTML='';
+  const pairX=Math.min(s.xp,s.xn),pairC=Math.min(s.cp,s.cn);
+  const mk=(type,neg,n,pairN)=>{
+    for(let i=0;i<n;i++){
+      const w=type==='x'?18:18,h=type==='x'?63:18;
+      const t=tileEl(type,neg,w,h,'inl flat'+(i<pairN?' pair':''));t.style.fontSize='11px';box.appendChild(t);
+    }
+  };
+  mk('x',false,s.xp,pairX);mk('x',true,s.xn,pairX);mk('1',false,s.cp,pairC);mk('1',true,s.cn,pairC);
+  if(!(s.xp||s.xn||s.cp||s.cn)){box.innerHTML='<span class="muted">0</span>';}
+}
+function drawEq(keepHint){
+  const E=T.eq;
+  if(!keepHint)E.hint='';
+  $('#eq-big').textContent=eqStr();
+  panelTiles(E.L,$('#pan-l'));panelTiles(E.R,$('#pan-r'));
+  $('#eq-zero').disabled=!hasPairs();
+  $('#eq-undo').disabled=!E.undo.length;
+  const dv=$('#eq-div');dv.innerHTML='';
+  const ds=hasPairs()?[]:divisors();
+  if(ds.length){dv.appendChild(el('span','gl','Bahagi kedua-dua belah dengan:'));}
+  ds.forEach(k=>{const b=el('button','btn','÷ '+k);b.onclick=()=>{
+    eqPush();[E.L,E.R].forEach(s=>{s.xp/=k;s.xn/=k;s.cp/=k;s.cn/=k;});eqLog('Bahagi kedua-dua belah dengan '+k);drawEq();};dv.appendChild(b);});
+  const sol=eqSolved(),nt=$('#eq-note');
+  if(sol!=null){
+    const o=E.orig,v=sol;
+    const lv=o.L[0]*v+o.L[1],rv=o.R[0]*v+o.R[1];
+    nt.className='note ok';
+    nt.innerHTML='<b>x = '+esc(fmt(v))+'</b>. Semak: belah kiri '+esc(fmt(o.L[0]))+'('+esc(fmt(v))+') + ('+esc(fmt(o.L[1]))+') = '+esc(fmt(lv))+', belah kanan '+esc(fmt(o.R[0]))+'('+esc(fmt(v))+') + ('+esc(fmt(o.R[1]))+') = '+esc(fmt(rv))+(lv===rv?' ✓':' ✗');
+  }else if(E.hint){nt.className='note';nt.textContent=E.hint;}
+  else if(hasPairs()){nt.className='note';nt.textContent='Jubin berpasangan ditanda garis putus-putus. Tekan "Buang pasangan sifar" untuk meringkaskan.';}
+  else{nt.className='note';nt.textContent='Matlamat: tinggalkan x seorang diri di satu belah. Apa sahaja yang dibuat pada satu belah mesti dibuat pada belah satu lagi.';}
+  $('#eq-log').innerHTML=E.log.map(l=>'<li>'+esc(l.d)+': <span class="eqs">'+esc(l.e)+'</span></li>').join('');
+}
+
+/* ---------- Penukar mod ---------- */
+function setTileMode(m){
+  T.mode=m;
+  $$('#tl-modes .tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.m===m)));
+  const eq=m==='eq';
+  $('#tl-grid').hidden=eq;$('#eq-card').hidden=!eq;
+  $('#cvin').innerHTML='';nodes.clear();T.matDims=null;
+  $('#tl-actions').innerHTML='';$('#tl-lines').innerHTML='';$('#tl-note').textContent='';$('#tl-note').className='note';
+  $('#cv').onpointerdown=null;
+  if(m==='free')buildFreeUI();
+  else if(m==='expand')buildExpandUI();
+  else if(m==='factor')buildFactorUI();
+  else buildEqUI();
+}
+$$('#tl-modes .tab').forEach(b=>b.addEventListener('click',()=>setTileMode(b.dataset.m)));
+showView('bar');
+})();
+</script>
+</body>
+</html>
